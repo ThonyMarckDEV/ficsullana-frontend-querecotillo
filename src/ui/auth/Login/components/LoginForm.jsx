@@ -3,7 +3,7 @@ import React from 'react';
 const LoginForm = ({ username, setUsername, password, setPassword, handleLogin, rememberMe, setRememberMe }) => {
   return (
     <div className="w-full max-w-md">
-      <h1 className="text-2xl font-bold text-red-700 mb-6 text-center">FICSULLANA - PIURA</h1>
+      <h1 className="text-2xl font-bold text-red-700 mb-6 text-center">FICSULLANA - QUERECOTILLO</h1>
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Iniciar Sesión</h2>
       <form onSubmit={handleLogin} className="space-y-4">
         <div>

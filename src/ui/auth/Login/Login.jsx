@@ -8,7 +8,7 @@ import ErrorsUtility from '../../../utilities/ErrorsUtility';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useNavigate } from 'react-router-dom';
-import piuraimg from '../../../assets/img/piuralogin.jpeg';
+import loginimg from '../../../assets/img/login.jpg';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -92,7 +92,7 @@ const Login = () => {
         {/* Left Side - Image */}
         <div className="hidden md:block w-1/2">
           <img
-            src={piuraimg}
+            src={loginimg}
             alt="Login background"
             className="object-cover w-full h-full"
           />
