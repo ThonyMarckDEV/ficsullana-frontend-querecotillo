@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import API_BASE_URL from '../../../js/urlHelper';
+import { useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 import jwtUtils from '../../../utilities/jwtUtils';
 import LoadingScreen from '../../../components/Shared/LoadingScreen';
 import LoginForm from './components/LoginForm';
+import ForgotPasswordForm from './components/ForgotPasswordForm';
 import ErrorsUtility from '../../../utilities/ErrorsUtility';
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { useNavigate } from 'react-router-dom';
 import loginimg from '../../../assets/img/login.jpg';
+
+import authService from './services/authService';
 
 const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [dni, setDni] = useState('');
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
@@ -22,21 +26,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/login`, 
-        { username, 
-          password,
-          remember_me: rememberMe
-        }, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const result = await authService.login(username, password, rememberMe);
 
-      const result = response.data;
-
-      const access_token = result.access_token;
-      const refresh_token = result.refresh_token;
-      const refresh_token_id = result.idRefreshToken;
+      const { access_token, refresh_token, idRefreshToken: refresh_token_id } = result;
 
       const accessTokenExpiration = '; path=/; Secure; SameSite=Strict';
       const refreshTokenExpiration = rememberMe
@@ -53,24 +45,22 @@ const Login = () => {
 
       const rol = jwtUtils.getUserRole(access_token);
 
-      if (rol === 'cliente') {
-        toast.success(`Login exitoso!!`);
-        setTimeout(() => {
-          navigate('/cliente');
-        }, 1500);
-      } else if (rol === 'manager') {
-        toast.success(`Login exitoso!!`);
-        setTimeout(() => {
-          navigate('/encargado');
-        }, 1500);
-      } else if (rol === 'admin') {
-        toast.success(`Login exitoso!!`);
-        setTimeout(() => {
-          navigate('/admin');
-        }, 1500);
-      } else {
-        console.error('Rol no reconocido:', rol);
-        toast.error(`Rol no reconocido: ${rol}`);
+      switch (rol) {
+        case 'cliente':
+          toast.success(`Login exitoso!!`);
+          setTimeout(() => navigate('/cliente'), 1500);
+          break;
+        case 'manager':
+          toast.success(`Login exitoso!!`);
+          setTimeout(() => navigate('/encargado'), 1500);
+          break;
+        case 'admin':
+          toast.success(`Login exitoso!!`);
+          setTimeout(() => navigate('/admin'), 1500);
+          break;
+        default:
+          console.error('Rol no reconocido:', rol);
+          toast.error(`Rol no reconocido: ${rol}`);
       }
     } catch (error) {
       if (error.response) {
@@ -78,6 +68,27 @@ const Login = () => {
         toast.error(errorMessage);
       } else {
         console.error('Error al intentar iniciar sesión:', error);
+        toast.error('Error interno del servidor. Por favor, inténtelo de nuevo más tarde.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      await authService.forgotPassword(dni);
+      toast.success('Se ha enviado un enlace de restablecimiento a tu correo.');
+      setTimeout(() => setShowForgotPassword(false), 1500);
+    } catch (error) {
+      if (error.response) {
+        const errorMessage = ErrorsUtility.getErrorMessage(error.response.data);
+        toast.error(errorMessage);
+      } else {
+        console.error('Error al solicitar restablecimiento de contraseña:', error);
         toast.error('Error interno del servidor. Por favor, inténtelo de nuevo más tarde.');
       }
     } finally {
@@ -101,8 +112,15 @@ const Login = () => {
         <div className="w-full md:w-1/2 p-8 flex items-center justify-center">
           {loading ? (
             <LoadingScreen />
+          ) : showForgotPassword ? (
+            <ForgotPasswordForm
+              dni={dni}
+              setDni={setDni}
+              handleForgotPassword={handleForgotPassword}
+              setShowForgotPassword={setShowForgotPassword}
+            />
           ) : (
-            <LoginForm 
+            <LoginForm
               username={username}
               setUsername={setUsername}
               password={password}
@@ -110,6 +128,7 @@ const Login = () => {
               handleLogin={handleLogin}
               rememberMe={rememberMe}
               setRememberMe={setRememberMe}
+              setShowForgotPassword={setShowForgotPassword}
             />
           )}
         </div>
