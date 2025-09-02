@@ -9,6 +9,9 @@ import 'react-toastify/dist/ReactToastify.css';
 //Componentes Globales
 import { ToastContainer } from 'react-toastify';
 
+// Layout
+import MainLayout from "./layouts/MainLayout";
+
 // UIS AUTH
 import ErrorPage from './components/ErrorPage';
 import ErrorPage401 from './components/ErrorPage401';
@@ -32,8 +35,19 @@ function AppContent() {
       {/* Rutas públicas */}
       <Route path="/"  element={<ProtectedRouteHome element={<Login />}  />} />
 
-      {/* Rutas cliente*/}
-      <Route path="/cliente"  element={<ProtectedRouteCliente element={<HomeCliente />}  />} />
+      {/* Cliente con Sidebar */}
+      <Route
+        path="/cliente"
+        element={
+          <ProtectedRouteCliente
+            element={
+              <MainLayout>
+                <HomeCliente />
+              </MainLayout>
+            }
+          />
+        }
+      />
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />

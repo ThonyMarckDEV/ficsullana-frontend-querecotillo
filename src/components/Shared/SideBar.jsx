@@ -42,7 +42,7 @@ const Sidebar = () => {
         ],
       },
     ],
-    manager: [
+    encargado: [
       {
         section: 'Dashboard',
         link: '/encargado/dashboard',
