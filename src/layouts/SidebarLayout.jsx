@@ -2,7 +2,7 @@
 import React from "react";
 import Sidebar from "../components/Shared/SideBar";
 
-const MainLayout = ({ children }) => {
+const SidebarLayout = ({ children }) => {
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -11,4 +11,4 @@ const MainLayout = ({ children }) => {
   );
 };
 
-export default MainLayout;
+export default SidebarLayout;

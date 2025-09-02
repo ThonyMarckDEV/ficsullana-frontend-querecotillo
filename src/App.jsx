@@ -10,7 +10,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 // Layout
-import MainLayout from "./layouts/MainLayout";
+import SidebarLayout from "./layouts/SidebarLayout.jsx";
 
 // UIS AUTH
 import ErrorPage from './components/ErrorPage';
@@ -35,19 +35,31 @@ function AppContent() {
       {/* Rutas públicas */}
       <Route path="/"  element={<ProtectedRouteHome element={<Login />}  />} />
 
-      {/* Cliente con Sidebar */}
-      <Route
-        path="/cliente"
-        element={
-          <ProtectedRouteCliente
-            element={
-              <MainLayout>
-                <HomeCliente />
-              </MainLayout>
-            }
-          />
-        }
-      />
+    {/* RUTAS CLIENTE */}
+        {/* Cliente Home */}
+        <Route
+          path="/cliente"
+          element={
+            <ProtectedRouteCliente
+              element={
+                <SidebarLayout>
+                  <HomeCliente />
+                </SidebarLayout>
+              }
+            />
+          }
+        />
+
+    {/* RUTAS SUPER ADMIN */}
+
+
+    {/* RUTAS ADMIN */}
+
+
+    {/* RUTAS ASESOR */}
+
+
+    {/* RUTAS CAJERO */}
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage />} />
