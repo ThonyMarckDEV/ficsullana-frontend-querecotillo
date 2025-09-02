@@ -54,7 +54,7 @@ function isTokenExpired(token) {
   }
   try {
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const expiraEn = new Date(payload.exp * 1000).toLocaleTimeString();
+    //const expiraEn = new Date(payload.exp * 1000).toLocaleTimeString();
     // console.log(`[Token] Expiración: ${expiraEn}`);
     
     const expirado = payload.exp * 1000 < Date.now();
