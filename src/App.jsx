@@ -13,7 +13,7 @@ import { ToastContainer } from 'react-toastify';
 import SidebarLayout from "./layouts/SidebarLayout.jsx";
 
 // UIS AUTH
-import ErrorPage from './components/ErrorPage';
+import ErrorPage404 from './components/ErrorPage404.jsx';
 import ErrorPage401 from './components/ErrorPage401';
 import Login from './ui/auth/Login/Login.jsx';
 
@@ -63,7 +63,7 @@ function AppContent() {
     {/* RUTAS CAJERO */}
 
       {/* Ruta de error */}
-      <Route path="/*" element={<ErrorPage />} />
+      <Route path="/*" element={<ErrorPage404 />} />
       <Route path="/401" element={<ErrorPage401 />} />
     </Routes>
   );
