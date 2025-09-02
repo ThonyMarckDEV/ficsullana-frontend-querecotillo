@@ -14,11 +14,20 @@ const ProtectedRoute = ({ element }) => {
       case 'cliente':
         return <Navigate to="/cliente" />;
         return element;
-      case 'manager':
-        return <Navigate to="/encargado" />;
+      case 'asesor':
+        return <Navigate to="/asesor" />;
+        return element;
+      case 'auditor':
+        return <Navigate to="/auditor" />;
         return element;
       case 'admin':
         return <Navigate to="/admin" />;
+        return element;
+      case 'superadmin':
+        return <Navigate to="/superadmin" />;
+        return element;
+      case 'cajero':
+        return <Navigate to="/cajero" />;
         return element;
     }
   }
