@@ -96,43 +96,74 @@ const Login = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen w-full bg-gray-100 flex items-center justify-center p-4">
-      <ToastContainer />
-      <div className="max-w-4xl w-full bg-white rounded-lg shadow-lg flex overflow-hidden">
-        {/* Left Side - Image */}
-        <div className="hidden md:block w-1/2">
-          <img
-            src={loginimg}
-            alt="Login background"
-            className="object-cover w-full h-full"
-          />
-        </div>
-        {/* Right Side - Form */}
-        <div className="w-full md:w-1/2 p-8 flex items-center justify-center">
-          {loading ? (
-            <LoadingScreen />
-          ) : showForgotPassword ? (
-            <ForgotPasswordForm
-              dni={dni}
-              setDni={setDni}
-              handleForgotPassword={handleForgotPassword}
-              setShowForgotPassword={setShowForgotPassword}
-            />
-          ) : (
-            <LoginForm
-              username={username}
-              setUsername={setUsername}
-              password={password}
-              setPassword={setPassword}
-              handleLogin={handleLogin}
-              rememberMe={rememberMe}
-              setRememberMe={setRememberMe}
-              setShowForgotPassword={setShowForgotPassword}
-            />
-          )}
-        </div>
+  return  (
+  <div className="relative min-h-screen w-full bg-gray-100 flex flex-col items-center justify-start p-4 overflow-hidden">
+      {/* 🔴 Header centrado arriba */}
+      <h1 className="text-5xl font-extrabold mt-8 mb-6 text-center">
+        <span className="text-yellow-500">FIC</span>
+        <span className="text-red-600">SULLANA</span>
+      </h1>
+    
+      {/* Wave Background */}
+      <div className="absolute bottom-0 left-0 right-0 z-0">
+        <svg
+          className="w-full h-48 sm:h-56 md:h-64 lg:h-80"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1440 320"
+          preserveAspectRatio="none"
+        >
+          <path
+            fill="#dc2626"
+            fillOpacity="1"
+            d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,202,576,213.3C672,224,768,192,864,181.3C960,171,1056,181,1152,192C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"
+          ></path>
+        </svg>
       </div>
+
+      <ToastContainer />
+      {/* Main Content */}
+        <div className="max-w-5xl w-full bg-white rounded-lg shadow-lg flex overflow-hidden relative z-10 mt-10 lg:mt-20">
+          {/* Left Side - Image */}
+          <div className="hidden lg:block w-1/2">
+            <img
+              src={loginimg}
+              alt="Login background"
+              className="object-cover w-full h-full"
+            />
+          </div>
+
+          {/* Right Side - Form */}
+          <div className="w-full lg:w-1/2 p-6 sm:p-8 lg:p-12 flex flex-col items-center mt-6 lg:mt-10">
+            {/* Header */}
+            <h3 className="text-2xl sm:text-2xl lg:text-4xl font-extrabold text-red-600 mb-6 text-center">
+              QUERECOTILLO
+            </h3>
+
+            {loading ? (
+              <LoadingScreen />
+            ) : showForgotPassword ? (
+              <ForgotPasswordForm
+                dni={dni}
+                setDni={setDni}
+                handleForgotPassword={handleForgotPassword}
+                setShowForgotPassword={setShowForgotPassword}
+              />
+            ) : (
+              <LoginForm
+                username={username}
+                setUsername={setUsername}
+                password={password}
+                setPassword={setPassword}
+                handleLogin={handleLogin}
+                rememberMe={rememberMe}
+                setRememberMe={setRememberMe}
+                setShowForgotPassword={setShowForgotPassword}
+              />
+            )}
+          </div>
+        </div>
+      
+
     </div>
   );
 };

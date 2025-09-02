@@ -12,9 +12,6 @@ const LoginForm = ({
 }) => {
   return (
     <div className="w-full max-w-md">
-      <h1 className="text-2xl font-bold mb-6 text-center text-red-700">
-        FICSULLANA - QUERECOTILLO
-      </h1>
       <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
         Iniciar Sesión
       </h2>
