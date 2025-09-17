@@ -1,12 +1,16 @@
-// src/layouts/MainLayout.jsx
+// src/layouts/SidebarLayout.jsx
 import React from "react";
 import Sidebar from "../components/Shared/SideBar";
+import { Outlet } from "react-router-dom";
 
-const SidebarLayout = ({ children }) => {
+const SidebarLayout = () => {
   return (
     <div className="min-h-screen flex">
       <Sidebar />
-      <main className="flex-1 md:ml-64 p-6 bg-gray-50">{children}</main>
+      <main className="flex-1 md:ml-64 p-6 bg-gray-50">
+        {/* Aquí se renderizan las rutas hijas */}
+        <Outlet />
+      </main>
     </div>
   );
 };

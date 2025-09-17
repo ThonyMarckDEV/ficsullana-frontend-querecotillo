@@ -17,50 +17,68 @@ import ErrorPage404 from './components/ErrorPage404.jsx';
 import ErrorPage401 from './components/ErrorPage401';
 import Login from './ui/auth/Login/Login.jsx';
 
+//UIS SUPERADMIN
+import HomeSuperAdmin from './ui/superadmin/home';
+
 // UIS ADMIN
 
 
 // UIS Cliente
 import HomeCliente from './ui/cliente/home';
+import SolicitarPrestamo from './ui/cliente/SolicitarPrestamo/SolicitarPrestamo';
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRouteHome';
-import ProtectedRouteCliente from './utilities/ProtectedRouteCliente.jsx';
+import ProtectedRouteCliente from './utilities/ProtectedRouteCliente';
+import ProtectedRouteSuperAdmin from './utilities/ProtectedRouteSuperAdmin';
 
 
 function AppContent() {
-
   return (
     <Routes>
       {/* Rutas públicas */}
-      <Route path="/"  element={<ProtectedRouteHome element={<Login />}  />} />
+      <Route
+        path="/"
+        element={<ProtectedRouteHome element={<Login />} />}
+      />
 
-    {/* RUTAS CLIENTE */}
-        {/* Cliente Home */}
-        <Route
-          path="/cliente"
-          element={
-            <ProtectedRouteCliente
-              element={
-                <SidebarLayout>
-                  <HomeCliente />
-                </SidebarLayout>
-              }
-            />
-          }
-        />
+      {/* RUTAS SUPER ADMIN */}
+      <Route
+        path="/superadmin"
+        element={
+          <ProtectedRouteSuperAdmin element={<SidebarLayout />} />
+        }
+      >
+        {/* Ruta Home (cuando solo pones /cliente) */}
+        <Route index element={<HomeSuperAdmin />} />
 
-    {/* RUTAS SUPER ADMIN */}
+        {/* Ruta Solicitar Préstamo */}
+        {/* <Route path="solicitar-prestamo" element={<SolicitarPrestamo />} /> */}
 
+        {/* Aquí agregas más módulos */}
 
-    {/* RUTAS ADMIN */}
-
-
-    {/* RUTAS ASESOR */}
+      </Route>
 
 
 
-    {/* RUTAS CAJERO */}
+      {/* RUTAS CLIENTE */}
+      <Route
+        path="/cliente"
+        element={
+          <ProtectedRouteCliente element={<SidebarLayout />} />
+        }
+      >
+        {/* Ruta Home (cuando solo pones /cliente) */}
+        <Route index element={<HomeCliente />} />
+
+        {/* Ruta Solicitar Préstamo */}
+        <Route path="solicitar-prestamo" element={<SolicitarPrestamo />} />
+
+        {/* Aquí agregas más módulos */}
+
+      </Route>
+
+
 
       {/* Ruta de error */}
       <Route path="/*" element={<ErrorPage404 />} />
@@ -68,6 +86,7 @@ function AppContent() {
     </Routes>
   );
 }
+
 
 function App() {
   return (

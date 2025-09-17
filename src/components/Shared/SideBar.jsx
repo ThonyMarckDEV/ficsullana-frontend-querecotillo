@@ -21,6 +21,27 @@ const Sidebar = () => {
   };
 
   const menus = {
+    superadmin: [
+      {
+        section: 'Dashboard',
+        link: '/admin/dashboard',
+        icon: 'dashboard-icon',
+      },
+      {
+        section: 'Users',
+        subs: [
+          { name: 'List Users', link: '/admin/users/list' },
+          { name: 'Add User', link: '/admin/users/add' },
+        ],
+      },
+      {
+        section: 'Settings',
+        subs: [
+          { name: 'General', link: '/admin/settings/general' },
+          { name: 'Security', link: '/admin/settings/security' },
+        ],
+      },
+    ],
     admin: [
       {
         section: 'Dashboard',
@@ -42,25 +63,6 @@ const Sidebar = () => {
         ],
       },
     ],
-    encargado: [
-      {
-        section: 'Dashboard',
-        link: '/encargado/dashboard',
-        icon: 'dashboard-icon',
-      },
-      {
-        section: 'Reports',
-        link: '/encargado/reports',
-        icon: 'reports-icon',
-      },
-      {
-        section: 'Teams',
-        subs: [
-          { name: 'Team List', link: '/encargado/teams/list' },
-          { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
-        ],
-      },
-    ],
     cliente: [
       {
         section: 'Profile',
@@ -78,6 +80,63 @@ const Sidebar = () => {
         section: 'Support',
         link: '/cliente/support',
         icon: 'support-icon',
+      },
+    ],
+    asesor: [
+      {
+        section: 'Dashboard',
+        link: '/asesor/dashboard',
+        icon: 'dashboard-icon',
+      },
+      {
+        section: 'Reports',
+        link: '/asesor/reports',
+        icon: 'reports-icon',
+      },
+      {
+        section: 'Teams',
+        subs: [
+          { name: 'Team List', link: '/encargado/teams/list' },
+          { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
+        ],
+      },
+    ],
+    auditor: [
+      {
+        section: 'Dashboard',
+        link: '/auditor/dashboard',
+        icon: 'dashboard-icon',
+      },
+      {
+        section: 'Reports',
+        link: '/auditor/reports',
+        icon: 'reports-icon',
+      },
+      {
+        section: 'Teams',
+        subs: [
+          { name: 'Team List', link: '/encargado/teams/list' },
+          { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
+        ],
+      },
+    ],
+    cajero: [
+      {
+        section: 'Dashboard',
+        link: '/cajero/dashboard',
+        icon: 'dashboard-icon',
+      },
+      {
+        section: 'Reports',
+        link: '/cajero/reports',
+        icon: 'reports-icon',
+      },
+      {
+        section: 'Teams',
+        subs: [
+          { name: 'Team List', link: '/encargado/teams/list' },
+          { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
+        ],
       },
     ],
   };
