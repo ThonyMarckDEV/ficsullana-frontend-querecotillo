@@ -23,30 +23,22 @@ const Sidebar = () => {
   const menus = {
     superadmin: [
       {
-        section: 'Dashboard',
-        link: '/admin/dashboard',
-        icon: 'dashboard-icon',
+        section: 'Home',
+        link: '/superadmin',
       },
       {
-        section: 'Users',
-        subs: [
-          { name: 'List Users', link: '/admin/users/list' },
-          { name: 'Add User', link: '/admin/users/add' },
-        ],
-      },
+        section: 'Clientes',
+        link: '/superadmin/clientes',
+      },      
       {
-        section: 'Settings',
-        subs: [
-          { name: 'General', link: '/admin/settings/general' },
-          { name: 'Security', link: '/admin/settings/security' },
-        ],
+        section: 'Empleados',
+        link: '/superadmin/empleados',
       },
     ],
     admin: [
       {
         section: 'Dashboard',
         link: '/admin/dashboard',
-        icon: 'dashboard-icon',
       },
       {
         section: 'Users',
@@ -65,33 +57,29 @@ const Sidebar = () => {
     ],
     cliente: [
       {
-        section: 'Profile',
-        link: '/cliente/profile',
-        icon: 'profile-icon',
+        section: 'Home',
+        link: '/cliente',
       },
       {
-        section: 'Orders',
+        section: 'Solicitudes Préstamos',
         subs: [
-          { name: 'View Orders', link: '/cliente/orders/view' },
-          { name: 'Track Order', link: '/cliente/orders/track' },
+          { name: 'Solicitar', link: '/cliente/solicitar-prestamo' },
+          { name: 'Mis Solicitudes', link: '/cliente/mis-solicitudes' },
         ],
       },
       {
         section: 'Support',
         link: '/cliente/support',
-        icon: 'support-icon',
       },
     ],
     asesor: [
       {
         section: 'Dashboard',
         link: '/asesor/dashboard',
-        icon: 'dashboard-icon',
       },
       {
         section: 'Reports',
         link: '/asesor/reports',
-        icon: 'reports-icon',
       },
       {
         section: 'Teams',
@@ -105,12 +93,10 @@ const Sidebar = () => {
       {
         section: 'Dashboard',
         link: '/auditor/dashboard',
-        icon: 'dashboard-icon',
       },
       {
         section: 'Reports',
         link: '/auditor/reports',
-        icon: 'reports-icon',
       },
       {
         section: 'Teams',
@@ -124,12 +110,10 @@ const Sidebar = () => {
       {
         section: 'Dashboard',
         link: '/cajero/dashboard',
-        icon: 'dashboard-icon',
       },
       {
         section: 'Reports',
         link: '/cajero/reports',
-        icon: 'reports-icon',
       },
       {
         section: 'Teams',
