@@ -15,7 +15,10 @@ const AvalForm = ({ formData, handleInputChange }) => {
           type="text"
           name="dniAval"
           value={formData.dniAval || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            const value = e.target.value.slice(0, 9);
+            handleInputChange({ target: { name: "dniAval", value } });
+          }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         />
@@ -26,7 +29,10 @@ const AvalForm = ({ formData, handleInputChange }) => {
           type="text"
           name="apellidoPaternoAval"
           value={formData.apellidoPaternoAval || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+            handleInputChange({ target: { name: "apellidoPaternoAval", value } });
+          }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         />
@@ -37,7 +43,10 @@ const AvalForm = ({ formData, handleInputChange }) => {
           type="text"
           name="apellidoMaternoAval"
           value={formData.apellidoMaternoAval || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+            handleInputChange({ target: { name: "apellidoMaternoAval", value } });
+          }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         />
@@ -48,7 +57,10 @@ const AvalForm = ({ formData, handleInputChange }) => {
           type="text"
           name="nombresAval"
           value={formData.nombresAval || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+            handleInputChange({ target: { name: "nombresAval", value } });
+          }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         />
@@ -56,7 +68,7 @@ const AvalForm = ({ formData, handleInputChange }) => {
       <div>
         <label className="block text-red-700 font-semibold">Teléfono Fijo del Aval</label>
         <input
-          type="tel"
+          type="number"
           name="telefonoFijoAval"
           value={formData.telefonoFijoAval || ''}
           onChange={handleInputChange}
@@ -66,7 +78,7 @@ const AvalForm = ({ formData, handleInputChange }) => {
       <div>
         <label className="block text-red-700 font-semibold">Teléfono Móvil del Aval</label>
         <input
-          type="tel"
+          type="number"
           name="telefonoMovilAval"
           value={formData.telefonoMovilAval || ''}
           onChange={handleInputChange}
@@ -148,7 +160,10 @@ const AvalForm = ({ formData, handleInputChange }) => {
           type="text"
           name="relacionAval"
           value={formData.relacionAval || ''}
-          onChange={handleInputChange}
+          onChange={(e) => {
+            const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
+            handleInputChange({ target: { name: "relacionAval", value } });
+          }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         />
