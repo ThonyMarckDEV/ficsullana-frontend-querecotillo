@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import jwtUtils from '../utilities/jwtUtils'; // Asegúrate de tener esta utilidad para decodificar el token
+import jwtUtils from '../../utilities/jwtUtils'; // Asegúrate de tener esta utilidad para decodificar el token
 
 const ProtectedRoute = ({ element }) => {
   // Obtener el JWT desde localStorage

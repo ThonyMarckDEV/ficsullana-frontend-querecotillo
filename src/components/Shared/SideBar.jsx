@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { Bars3Icon, ChevronDownIcon } from '@heroicons/react/24/outline';
 import jwtUtils from '../../utilities/jwtUtils';
 import { logout } from '../../js/logout';
@@ -9,7 +9,6 @@ const Sidebar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [openSections, setOpenSections] = useState({});
   const [showConfirm, setShowConfirm] = useState(false);
-  const navigate = useNavigate();
 
   const refresh_token = jwtUtils.getRefreshTokenFromCookie();
   const rol = refresh_token ? jwtUtils.getUserRole(refresh_token) : null;
@@ -17,7 +16,6 @@ const Sidebar = () => {
   const handleLogout = () => {
     logout();
     setShowConfirm(false);
-    navigate('/login');
   };
 
   const menus = {
@@ -61,7 +59,7 @@ const Sidebar = () => {
         link: '/cliente',
       },
       {
-        section: 'Solicitudes Préstamos',
+        section: 'Solicitud Préstamos',
         subs: [
           { name: 'Solicitar', link: '/cliente/solicitar-prestamo' },
           { name: 'Mis Solicitudes', link: '/cliente/mis-solicitudes' },

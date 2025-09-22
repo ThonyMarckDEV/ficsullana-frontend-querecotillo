@@ -17,20 +17,23 @@ import ErrorPage404 from './components/ErrorPage404.jsx';
 import ErrorPage401 from './components/ErrorPage401';
 import Login from './ui/auth/Login/Login.jsx';
 
+//UI HOME
+import Home from './ui/home/Home.jsx';
+
 //UIS SUPERADMIN
-import HomeSuperAdmin from './ui/superadmin/home';
+
 
 // UIS ADMIN
 
 
-// UIS Cliente
-import HomeCliente from './ui/cliente/home';
-import SolicitarPrestamo from './ui/cliente/SolicitarPrestamo/SolicitarPrestamo';
+// UIS CLIENTE
+
 
 // Utilities
-import ProtectedRouteHome from './utilities/ProtectedRouteHome';
-import ProtectedRouteCliente from './utilities/ProtectedRouteCliente';
-import ProtectedRouteSuperAdmin from './utilities/ProtectedRouteSuperAdmin';
+import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome.jsx';
+import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente.jsx';
+import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin.jsx';
+import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor.jsx';
 
 
 function AppContent() {
@@ -50,10 +53,10 @@ function AppContent() {
         }
       >
         {/* Ruta Home (cuando solo pones /cliente) */}
-        <Route index element={<HomeSuperAdmin />} />
+        <Route index element={<Home />} />
 
         {/* Ruta Solicitar Préstamo */}
-        {/* <Route path="solicitar-prestamo" element={<SolicitarPrestamo />} /> */}
+        
 
         {/* Aquí agregas más módulos */}
 
@@ -69,10 +72,22 @@ function AppContent() {
         }
       >
         {/* Ruta Home (cuando solo pones /cliente) */}
-        <Route index element={<HomeCliente />} />
+        <Route index element={<Home />} />
 
-        {/* Ruta Solicitar Préstamo */}
-        <Route path="solicitar-prestamo" element={<SolicitarPrestamo />} />
+        {/* Aquí agregas más módulos */}
+
+      </Route>
+
+
+      {/* RUTAS ASESOR */}
+      <Route
+        path="/asesor"
+        element={
+          <ProtectedRouteAsesor element={<SidebarLayout />} />
+        }
+      >
+        {/* Ruta Home (cuando solo pones /cliente) */}
+        <Route index element={<Home />} />
 
         {/* Aquí agregas más módulos */}
 

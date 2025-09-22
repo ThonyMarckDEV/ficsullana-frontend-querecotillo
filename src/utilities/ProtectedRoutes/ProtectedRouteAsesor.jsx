@@ -1,8 +1,8 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import jwtUtils from '../utilities/jwtUtils'; // Asegúrate de tener esta utilidad para decodificar el token
+import jwtUtils from '../../utilities/jwtUtils'; // Asegúrate de tener esta utilidad para decodificar el token
 
-const ProtectedRouteUser = ({ element }) => {
+const ProtectedRouteAsesor = ({ element }) => {
   // Obtener el JWT desde localStorage
   const refresh_token = jwtUtils.getRefreshTokenFromCookie();
 
@@ -13,7 +13,7 @@ const ProtectedRouteUser = ({ element }) => {
 
   const rol = jwtUtils.getUserRole(refresh_token);
 
-  if (rol !== 'cliente') {
+  if (rol !== 'asesor') {
     return <Navigate to="/404" />;
   }
 
@@ -22,4 +22,4 @@ const ProtectedRouteUser = ({ element }) => {
 
 };
 
-export default ProtectedRouteUser;
+export default ProtectedRouteAsesor;
