@@ -76,8 +76,8 @@ const Sidebar = () => {
         link: '/asesor/dashboard',
       },
       {
-        section: 'Solicitud Prestamo',
-        link: '/asesor/solicitud-prestamo',
+        section: 'Evaluacion Cliente',
+        link: '/asesor/evaluacion-cliente',
       },
       {
         section: 'Mis Solicitudes Enviadas',

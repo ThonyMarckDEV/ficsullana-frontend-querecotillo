@@ -1,14 +1,14 @@
-// src/components/SolicitudPrestamo.jsx (actualizado)
+// src/components/EvaluacionCliente.jsx (actualizado)
 import React, { useState } from 'react';
 import ViewPdfModal from '../../components/Shared/Modals/ViewPdfModal';
 import UsuarioForm from './components/Formularios/UsuarioForm';
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
 import CollapsibleSection from './components/CollapsibleSection';
-import createSolicitud from './services/solicitudPrestamoService';
+import createSolicitud from './services/evaluacionClienteService';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
 
-const SolicitudPrestamo = () => {
+const EvaluacionCliente = () => {
   const initialFormData = {
     //CAMPOS USUARIO
     dni: '',
@@ -182,7 +182,7 @@ const SolicitudPrestamo = () => {
   return (
     <div className="flex-1 p-6 bg-white relative">
       {isLoading && <LoadingScreen />}
-      <h1 className="text-2xl font-bold text-red-800 mb-6">Solicitud de Préstamo</h1>
+      <h1 className="text-2xl font-bold text-red-800 mb-6">Evaluacion Cliente</h1>
       
       <form onSubmit={handleSubmit} className="space-y-4">
         <CollapsibleSection title="Información del Usuario">
@@ -247,4 +247,4 @@ const SolicitudPrestamo = () => {
   );
 };
 
-export default SolicitudPrestamo;
+export default EvaluacionCliente;

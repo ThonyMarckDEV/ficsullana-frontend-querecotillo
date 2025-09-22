@@ -29,7 +29,7 @@ import Home from './ui/home/Home.jsx';
 // UIS CLIENTE
 
 //UIS ASESOR
-import SolicitudPrestamo from './ui/solicitudPrestamo/SolicitudPrestamo.jsx';
+import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente.jsx';
 
 
 // Utilities
@@ -92,8 +92,8 @@ function AppContent() {
         {/* Ruta Home (cuando solo pones /cliente) */}
         <Route index element={<Home />} />
 
-        {/* Ruta Solicitud de Préstamo */}
-        <Route path="solicitud-prestamo" element={<SolicitudPrestamo />} />
+        {/* Ruta Evaluación de Cliente */}
+        <Route path="evaluacion-cliente" element={<EvaluacionCliente />} />
 
       </Route>
 
