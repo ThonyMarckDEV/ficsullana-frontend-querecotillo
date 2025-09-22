@@ -76,15 +76,12 @@ const Sidebar = () => {
         link: '/asesor/dashboard',
       },
       {
-        section: 'Reports',
-        link: '/asesor/reports',
+        section: 'Solicitud Prestamo',
+        link: '/asesor/solicitud-prestamo',
       },
       {
-        section: 'Teams',
-        subs: [
-          { name: 'Team List', link: '/encargado/teams/list' },
-          { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
-        ],
+        section: 'Mis Solicitudes Enviadas',
+        link: '/asesor/mis-solicitudes-enviadas',
       },
     ],
     auditor: [

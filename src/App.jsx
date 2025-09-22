@@ -28,6 +28,9 @@ import Home from './ui/home/Home.jsx';
 
 // UIS CLIENTE
 
+//UIS ASESOR
+import SolicitudPrestamo from './ui/solicitudPrestamo/SolicitudPrestamo.jsx';
+
 
 // Utilities
 import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome.jsx';
@@ -89,7 +92,8 @@ function AppContent() {
         {/* Ruta Home (cuando solo pones /cliente) */}
         <Route index element={<Home />} />
 
-        {/* Aquí agregas más módulos */}
+        {/* Ruta Solicitud de Préstamo */}
+        <Route path="solicitud-prestamo" element={<SolicitudPrestamo />} />
 
       </Route>
 
