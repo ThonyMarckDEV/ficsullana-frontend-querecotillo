@@ -12,7 +12,7 @@ const AvalForm = ({ formData, handleInputChange }) => {
       <div>
         <label className="block text-red-700 font-semibold">DNI del Aval</label>
         <input
-          type="text"
+          type="number"
           name="dniAval"
           value={formData.dniAval || ''}
           onChange={(e) => {
