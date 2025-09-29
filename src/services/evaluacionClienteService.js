@@ -1,4 +1,5 @@
-// src/services/solicitudService.js
+// src/services/evaluacionClienteService.js
+
 import { fetchWithAuth } from 'js/authToken';
 import API_BASE_URL from 'js/urlHelper';
 
@@ -22,7 +23,7 @@ const createEvaluacion = async (dataToSend, pdfFile) => {
 };
 
 
-// NUEVA: Para enviar la actualización
+
 export const updateEvaluacion = async (evaluacionId, data) => {
   const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/update/${evaluacionId}`, {
     method: 'PUT',
