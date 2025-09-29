@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import jwtUtils from "../../utilities/jwtUtils";
+import jwtUtils from "utilities/jwtUtils";
 
 const Home = () => {
   const [rol, setRol] = useState(null);

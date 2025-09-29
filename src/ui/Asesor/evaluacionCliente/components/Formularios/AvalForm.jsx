@@ -1,6 +1,6 @@
 // src/components/AvalForm.jsx
 import React from 'react';
-import peruData from '../../../../utilities/PeruData/PeruData';
+import peruData from 'utilities/PeruData/PeruData';
 
 const AvalForm = ({ formData, handleInputChange }) => {
   const departamentos = Object.keys(peruData);

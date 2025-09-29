@@ -6,7 +6,7 @@ import { getClienteParaCorregir, updateEvaluacion } from './services/evaluacionC
 import UsuarioForm from './components/Formularios/UsuarioForm'; 
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
-import LoadingScreen from '../../components/Shared/LoadingScreen';
+import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
 const CorregirEvaluacion = () => {
@@ -25,7 +25,6 @@ const CorregirEvaluacion = () => {
         setLoading(true);
         const data = await getClienteParaCorregir(dniCliente);
         
-        // --- SOLUCIÓN: CONSTRUIR EL ESTADO INICIAL DE FORMA SEGURA ---
         const datos = data.datosCliente;
         const contacto = data.datosCliente.contactos[0] || {};
         const direccion = data.datosCliente.direcciones[0] || {};

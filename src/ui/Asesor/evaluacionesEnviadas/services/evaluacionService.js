@@ -1,5 +1,5 @@
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
+import { fetchWithAuth } from 'js/authToken';
+import API_BASE_URL from 'js/urlHelper';
 
 
 export const getEvaluaciones = async (dni) => {

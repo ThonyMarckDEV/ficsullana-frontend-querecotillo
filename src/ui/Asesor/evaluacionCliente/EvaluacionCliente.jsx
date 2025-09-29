@@ -1,12 +1,12 @@
 // src/components/EvaluacionCliente.jsx (actualizado)
 import React, { useState } from 'react';
-import ViewPdfModal from '../../components/Shared/Modals/ViewPdfModal';
+import ViewPdfModal from 'components/Shared/Modals/ViewPdfModal';
 import UsuarioForm from './components/Formularios/UsuarioForm';
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
 import CollapsibleSection from './components/CollapsibleSection';
 import createSolicitud from './services/evaluacionClienteService';
-import LoadingScreen from '../../components/Shared/LoadingScreen';
+import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
 const EvaluacionCliente = () => {

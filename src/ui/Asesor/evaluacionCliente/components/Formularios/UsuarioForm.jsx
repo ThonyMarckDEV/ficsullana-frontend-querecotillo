@@ -1,7 +1,7 @@
 
       // src/components/UsuarioForm.jsx
 import React from 'react';
-import peruData from '../../../../utilities/PeruData/PeruData';
+import peruData from 'utilities/PeruData/PeruData';
 
 const UsuarioForm = ({ formData, handleInputChange }) => {
   const departamentos = Object.keys(peruData);

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import API_BASE_URL from '../../../../js/urlHelper';
+import API_BASE_URL from 'js/urlHelper';
 
 const login = async (username, password, rememberMe) => {
   const response = await axios.post(

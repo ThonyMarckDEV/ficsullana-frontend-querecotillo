@@ -1,6 +1,6 @@
 // src/services/solicitudService.js
-import { fetchWithAuth } from '../../../js/authToken';
-import API_BASE_URL from '../../../js/urlHelper';
+import { fetchWithAuth } from 'js/authToken';
+import API_BASE_URL from 'js/urlHelper';
 
 const createSolicitud = async (dataToSend, pdfFile) => {
   const formDataToSend = new FormData();

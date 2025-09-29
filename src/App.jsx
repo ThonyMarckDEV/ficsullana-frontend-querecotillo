@@ -29,9 +29,9 @@ import Home from './ui/home/Home.jsx';
 // UIS CLIENTE
 
 //UIS ASESOR
-import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente.jsx';
-import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
-
+import EvaluacionCliente from './ui/Asesor/evaluacionCliente/EvaluacionCliente.jsx';
+import EvaluacionesEnviadas from './ui/Asesor/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
+import CorregirEvaluacion from './ui/Asesor/evaluacionCliente/CorregirEvaluacion.jsx';
 
 
 // Utilities
@@ -39,7 +39,7 @@ import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome.j
 import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente.jsx';
 import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin.jsx';
 import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor.jsx';
-import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion.jsx';
+
 
 
 function AppContent() {

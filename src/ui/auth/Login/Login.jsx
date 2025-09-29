@@ -3,12 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-import jwtUtils from '../../../utilities/jwtUtils';
-import LoadingScreen from '../../../components/Shared/LoadingScreen';
+import jwtUtils from 'utilities/jwtUtils';
+import LoadingScreen from 'components/Shared/LoadingScreen';
 import LoginForm from './components/LoginForm';
 import ForgotPasswordForm from './components/ForgotPasswordForm';
-import ErrorsUtility from '../../../utilities/ErrorsUtility';
-import loginimg from '../../../assets/img/login.jpg';
+import ErrorsUtility from 'utilities/ErrorsUtility';
+import loginimg from 'assets/img/login.jpg';
 
 import authService from './services/authService';
 
