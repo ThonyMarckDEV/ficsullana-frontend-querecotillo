@@ -57,12 +57,12 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           className="w-full p-2 border border-yellow-500 rounded"
           required
         >
-          {/* <option value="">Seleccione...</option> */}
+          <option value="">Seleccione...</option>
           <option value="nuevo">NUEVO</option>
-          {/* <option value="consaldo">CON SALDO</option>
+          <option value="consaldo">CON SALDO</option>
           <option value="reprogramado">REPROGRAMADO</option>
           <option value="refinanciado">REFINANCIADO</option>
-          <option value="recurrente">RECURRENTE</option> */}
+          <option value="recurrente">RECURRENTE</option>
         </select>
       </div>
       <div>
@@ -78,14 +78,18 @@ const CreditoForm = ({ formData, handleInputChange }) => {
       </div>
       <div>
         <label className="block text-red-700 font-semibold">Período del Crédito</label>
-        <input
-          type="text"
+        <select
           name="periodoCredito"
           value={formData.periodoCredito || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
           required
-        />
+        >
+          <option value="">Seleccione...</option>
+          <option value="mensual">Mensual</option>
+          <option value="catorcenal">Catorcenal</option>
+          <option value="semanal">Semanal</option>
+        </select>
       </div>
     </div>
   );

@@ -132,8 +132,8 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
           required
         >
           <option value="">Seleccione...</option>
-          <option value="si">Sí</option>
-          <option value="no">No</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
         </select>
       </div>
       <div>

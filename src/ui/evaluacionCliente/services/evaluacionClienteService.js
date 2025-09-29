@@ -7,7 +7,7 @@ const createSolicitud = async (dataToSend, pdfFile) => {
   formDataToSend.append('data', JSON.stringify(dataToSend));
   formDataToSend.append('pdf', pdfFile);
 
-  const response = await fetchWithAuth(`${API_BASE_URL}/api/solicitudes/create`, {
+  const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, {
     method: 'POST',
     body: formDataToSend,
   });
