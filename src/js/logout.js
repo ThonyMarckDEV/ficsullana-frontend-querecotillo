@@ -20,7 +20,7 @@ export async function logout() {
 
     if (idToken) {
       // Llamar al backend para eliminar la sesión
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/logout`, {
+      await fetchWithAuth(`${API_BASE_URL}/api/logout`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
