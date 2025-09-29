@@ -51,8 +51,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
       <div>
         <label className="block text-red-700 font-semibold">Modalidad</label>
         <select
-          name="modalidad"
-          value={formData.modalidad || ''}
+          name="modalidadCredito"
+          value={formData.modalidadCredito || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
           required

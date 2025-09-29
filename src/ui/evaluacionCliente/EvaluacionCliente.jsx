@@ -42,13 +42,14 @@ const EvaluacionCliente = () => {
     provincia: '',
     departamento: '',
     distrito: '',
+    expuestaPoliticamente: '',
     
     //CAMPOS CREDITO
     producto: '',
     montoPrestamo: '',
     tasaInteres: '',
     cuotas: '',
-    modalidad: '',
+    modalidadCredito: '',
     destinoCredito: '',
     periodoCredito: '',
 
@@ -129,13 +130,14 @@ const EvaluacionCliente = () => {
         provincia: formData.provincia,
         departamento: formData.departamento,
         distrito: formData.distrito,
+        expuestaPoliticamente: formData.expuestaPoliticamente
       },
       credito: {
         producto: formData.producto,
         montoPrestamo: formData.montoPrestamo,
         tasaInteres: formData.tasaInteres,
         cuotas: formData.cuotas,
-        modalidad: formData.modalidad,
+        modalidadCredito: formData.modalidadCredito,
         destinoCredito: formData.destinoCredito,
         periodoCredito: formData.periodoCredito,
       },

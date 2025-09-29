@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getClienteParaCorregir, updateEvaluacion } from './services/evaluacionClienteService';
 
-// Importa tus componentes de formulario
 import UsuarioForm from './components/Formularios/UsuarioForm'; 
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
@@ -22,18 +21,69 @@ const CorregirEvaluacion = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
+        setLoading(true);
         const data = await getClienteParaCorregir(dniCliente);
         
-        // Aplanamos la data para que coincida con la estructura de los formularios
+        // --- SOLUCIÓN: CONSTRUIR EL ESTADO INICIAL DE FORMA SEGURA ---
+        const datos = data.datosCliente;
+        const contacto = data.datosCliente.contactos[0] || {};
+        const direccion = data.datosCliente.direcciones[0] || {};
+        const empleo = data.datosCliente.empleos[0] || {};
+        const cuenta = data.datosCliente.cuentas_bancarias[0] || {};
+
         const initialFormData = {
-          usuario: { ...data.usuario, ...data.usuario.contactos[0], ...data.usuario.direcciones[0], ...data.usuario.empleos[0], ...data.usuario.cuentas_bancarias[0] },
+          usuario: {
+            // Datos de la tabla 'datos' (incluyendo el ID correcto)
+            id: datos.id,
+            nombre: datos.nombre,
+            apellidoPaterno: datos.apellidoPaterno,
+            apellidoMaterno: datos.apellidoMaterno,
+            estadoCivil: datos.estadoCivil,
+            sexo: datos.sexo,
+            dni: datos.dni,
+            fechaCaducidadDni: datos.fechaCaducidadDni,
+            fechaNacimiento: datos.fechaNacimiento,
+            nacionalidad: datos.nacionalidad,
+            residePeru: datos.residePeru,
+            nivelEducativo: datos.nivelEducativo,
+            profesion: datos.profesion,
+            enfermedadesPreexistentes: datos.enfermedadesPreexistentes,
+            expuestaPoliticamente: datos.expuestaPoliticamente,
+
+            // Datos de la tabla 'contactos'
+            telefonoMovil: contacto.telefonoMovil,
+            telefonoFijo: contacto.telefonoFijo,
+            correo: contacto.correo,
+
+            // Datos de la tabla 'direcciones'
+            direccionFiscal: direccion.direccionFiscal,
+            direccionCorrespondencia: direccion.direccionCorrespondencia,
+            departamento: direccion.departamento,
+            provincia: direccion.provincia,
+            distrito: direccion.distrito,
+            tipoVivienda: direccion.tipoVivienda,
+            tiempoResidencia: direccion.tiempoResidencia,
+            referenciaDomicilio: direccion.referenciaDomicilio,
+
+            // Datos de la tabla 'empleos'
+            centroLaboral: empleo.centroLaboral,
+            ingresoMensual: empleo.ingresoMensual,
+            inicioLaboral: empleo.inicioLaboral,
+            situacionLaboral: empleo.situacionLaboral,
+
+            // Datos de la tabla 'cuentas_bancarias'
+            ctaAhorros: cuenta.ctaAhorros,
+            cci: cuenta.cci,
+            entidadFinanciera: cuenta.entidadFinanciera,
+          },
           credito: data.evaluacion,
           aval: data.aval || {},
         };
 
         setFormData(initialFormData);
         setEvaluacionId(data.evaluacion.id);
-        setShowAval(!!data.aval); // Muestra el form de aval si existe
+        setShowAval(!!data.aval);
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -43,7 +93,6 @@ const CorregirEvaluacion = () => {
     cargarDatos();
   }, [dniCliente]);
   
-  // Manejador genérico para todos los inputs anidados
   const handleInputChange = (e, formType) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -60,12 +109,13 @@ const CorregirEvaluacion = () => {
     setLoading(true);
     setError(null);
     try {
+        // Usamos el formData directamente, ya que ahora tiene la estructura correcta
       await updateEvaluacion(evaluacionId, {
         ...formData,
-        aval: showAval ? formData.aval : null, // Solo envía el aval si el form está visible
+        aval: showAval ? formData.aval : null,
       });
       alert('Evaluación actualizada con éxito');
-      navigate('/asesor/evaluaciones'); // Redirige al listado
+      navigate('/asesor/evaluaciones-enviadas');
     } catch (err) {
       setError(err.message);
       alert(`Error: ${err.message}`);
@@ -83,21 +133,16 @@ const CorregirEvaluacion = () => {
         <h1 className="text-4xl font-bold text-gray-800 mb-8 border-b pb-4">
           Corregir Evaluación del Cliente: {dniCliente}
         </h1>
-
         <form onSubmit={handleSubmit}>
-          {/* ---- Sección de Datos del Usuario ---- */}
+          {/* ... El resto del JSX (los formularios y botones) no necesita cambios ... */}
           <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
             <h2 className="text-2xl font-semibold text-red-700 mb-4">1. Datos del Cliente</h2>
             {formData && <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} />}
           </div>
-
-          {/* ---- Sección de Datos del Crédito ---- */}
           <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
             <h2 className="text-2xl font-semibold text-red-700 mb-4">2. Datos del Crédito</h2>
             {formData && <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />}
           </div>
-
-          {/* ---- Sección de Datos del Aval ---- */}
           <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-red-700">3. Datos del Aval</h2>
@@ -111,8 +156,6 @@ const CorregirEvaluacion = () => {
             </div>
             {showAval && formData && <AvalForm formData={formData.aval} handleInputChange={(e) => handleInputChange(e, 'aval')} />}
           </div>
-          
-          {/* ---- Botón de Envío ---- */}
           <div className="text-center mt-10">
             <button
               type="submit"

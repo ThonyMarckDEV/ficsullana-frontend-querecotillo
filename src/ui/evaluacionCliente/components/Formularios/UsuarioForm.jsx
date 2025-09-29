@@ -137,7 +137,21 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
         <label className="block text-red-700 font-semibold">Reside en Perú</label>
         <select
           name="residePeru"
-          value={formData.residePeru || ''}
+          value={formData.residePeru ?? ''}
+          onChange={handleInputChange}
+          className="w-full p-2 border border-yellow-500 rounded"
+          required
+        >
+          <option value="">Seleccione...</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
+        </select>
+      </div>
+      <div>
+        <label className="block text-red-700 font-semibold">Politicamente Expuesta</label>
+        <select
+          name="expuestaPoliticamente"
+          value={formData.expuestaPoliticamente ?? ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
           required
@@ -211,14 +225,14 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
         <label className="block text-red-700 font-semibold">Enfermedades Preexistentes</label>
         <select
           name="enfermedadesPreexistentes"
-          value={formData.enfermedadesPreexistentes || ''}
+          value={formData.enfermedadesPreexistentes ?? ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
           required
         >
           <option value="">Seleccione...</option>
-          <option value="1">SI</option>
-          <option value="0">NO</option>
+          <option value="1">Sí</option>
+          <option value="0">No</option>
         </select>
       </div>
       <div>

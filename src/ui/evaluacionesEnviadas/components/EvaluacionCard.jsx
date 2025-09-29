@@ -5,8 +5,8 @@ import { Link } from 'react-router-dom';
 // --- COMPONENTE PARA MOSTRAR UNA TARJETA DE EVALUACIÓN ---
 export const EvaluacionCard = ({ evaluacion }) => {
   const { 
-    cliente, producto, monto_prestamo, tasa_interes, cuotas,
-    modalidad_credito, periodo_credito, destino_credito, estado,
+    cliente, producto, montoPrestamo, tasaInteres, cuotas,
+    modalidadCredito, periodoCredito, destinoCredito, estado,
     observaciones, created_at 
   } = evaluacion;
 
@@ -39,12 +39,12 @@ export const EvaluacionCard = ({ evaluacion }) => {
         <div>
           <label className="block text-red-700 font-semibold text-sm">Monto Solicitado</label>
           <p className="text-xl font-medium text-gray-900">
-            S/ {parseFloat(monto_prestamo).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
+            S/ {parseFloat(montoPrestamo).toLocaleString('es-PE', { minimumFractionDigits: 2 })}
           </p>
         </div>
         <div>
           <label className="block text-red-700 font-semibold text-sm">Tasa de Interés</label>
-          <p className="text-lg text-gray-800">{tasa_interes}%</p>
+          <p className="text-lg text-gray-800">{tasaInteres}%</p>
         </div>
         <div>
           <label className="block text-red-700 font-semibold text-sm">Cuotas</label>
@@ -52,15 +52,15 @@ export const EvaluacionCard = ({ evaluacion }) => {
         </div>
         <div>
           <label className="block text-red-700 font-semibold text-sm">Modalidad</label>
-          <p className="text-gray-800">{modalidad_credito}</p>
+          <p className="text-gray-800">{modalidadCredito}</p>
         </div>
         <div>
           <label className="block text-red-700 font-semibold text-sm">Periodo</label>
-          <p className="text-gray-800">{periodo_credito}</p>
+          <p className="text-gray-800">{periodoCredito}</p>
         </div>
         <div>
           <label className="block text-red-700 font-semibold text-sm">Destino</label>
-          <p className="text-gray-800">{destino_credito}</p>
+          <p className="text-gray-800">{destinoCredito}</p>
         </div>
       </div>
       
