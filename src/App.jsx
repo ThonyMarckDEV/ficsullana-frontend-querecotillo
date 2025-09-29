@@ -30,6 +30,8 @@ import Home from './ui/home/Home.jsx';
 
 //UIS ASESOR
 import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente.jsx';
+import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
+
 
 
 // Utilities
@@ -94,6 +96,8 @@ function AppContent() {
 
         {/* Ruta Evaluación de Cliente */}
         <Route path="evaluacion-cliente" element={<EvaluacionCliente />} />
+        {/* Ruta para Evaluaciones Enviadas */}
+        <Route path="evaluaciones-enviadas" element={<EvaluacionesEnviadas />} />
 
       </Route>
 
