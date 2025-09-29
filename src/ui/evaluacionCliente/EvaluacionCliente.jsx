@@ -7,7 +7,7 @@ import AvalForm from './components/Formularios/AvalForm';
 import CollapsibleSection from './components/CollapsibleSection';
 import createSolicitud from './services/evaluacionClienteService';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const EvaluacionCliente = () => {
   const initialFormData = {
@@ -248,7 +248,6 @@ const EvaluacionCliente = () => {
       </form>
       
       <ViewPdfModal isOpen={modalOpen} onClose={closeModal} pdfUrl={pdfUrl} />
-      <ToastContainer/>
     </div>
   );
 };

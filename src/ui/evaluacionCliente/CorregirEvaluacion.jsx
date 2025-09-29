@@ -7,7 +7,7 @@ import UsuarioForm from './components/Formularios/UsuarioForm';
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
-import { toast, ToastContainer } from 'react-toastify';
+import { toast } from 'react-toastify';
 
 const CorregirEvaluacion = () => {
   const { dniCliente } = useParams();
