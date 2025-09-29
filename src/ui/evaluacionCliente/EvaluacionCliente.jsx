@@ -7,14 +7,16 @@ import AvalForm from './components/Formularios/AvalForm';
 import CollapsibleSection from './components/CollapsibleSection';
 import createSolicitud from './services/evaluacionClienteService';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
+import { toast } from 'react-toastify';
 
 const EvaluacionCliente = () => {
   const initialFormData = {
     //CAMPOS USUARIO
     dni: '',
+    fechaCaducidadDni:'',
     apellidoPaterno: '',
     apellidoMaterno: '',
-    nombres: '',
+    nombre: '',
     fechaNacimiento: '',
     sexo: '',
     estadoCivil: '',
@@ -98,9 +100,10 @@ const EvaluacionCliente = () => {
     const dataToSend = {
       usuario: {
         dni: formData.dni,
+        fechaCaducidadDni:formData.fechaCaducidadDni,
         apellidoPaterno: formData.apellidoPaterno,
         apellidoMaterno: formData.apellidoMaterno,
-        nombres: formData.nombres,
+        nombre: formData.nombre,
         fechaNacimiento: formData.fechaNacimiento,
         sexo: formData.sexo,
         estadoCivil: formData.estadoCivil,
@@ -159,7 +162,7 @@ const EvaluacionCliente = () => {
     try {
       const result = await createSolicitud(dataToSend, pdfFile);
       console.log('Respuesta del backend:', result);
-      alert('Solicitud enviada exitosamente.');
+      toast.success('Datos Enviados Correctamente');
       // Limpiar el formulario si es exitoso
       setFormData(initialFormData);
       setPdfFile(null);
@@ -167,7 +170,7 @@ const EvaluacionCliente = () => {
       setTieneAval(false);
     } catch (error) {
       console.error('Error al enviar la solicitud:', error);
-      alert(error.message || 'Error al enviar la solicitud');
+      toast.error(error.message || 'Error al enviar la solicitud');
     } finally {
       setIsLoading(false);
     }

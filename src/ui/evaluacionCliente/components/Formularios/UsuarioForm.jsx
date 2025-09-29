@@ -25,6 +25,17 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
         />
       </div>
       <div>
+        <label className="block text-red-700 font-semibold">Fecha de Caducidad del DNI</label>
+        <input
+          type="date"
+          name="fechaCaducidadDni"
+          value={formData.fechaCaducidadDni || ''}
+          onChange={handleInputChange}
+          className="w-full p-2 border border-yellow-500 rounded"
+          required
+        />
+      </div>
+      <div>
         <label className="block text-red-700 font-semibold">Apellido Paterno</label>
         <input
           type="text"
@@ -56,11 +67,11 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
         <label className="block text-red-700 font-semibold">Nombres</label>
         <input
           type="text"
-          name="nombres"
-          value={formData.nombres || ''}
+          name="nombre"
+          value={formData.nombre || ''}
           onChange={(e) => {
             const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
-            handleInputChange({ target: { name: "nombres", value } });
+            handleInputChange({ target: { name: "nombre", value } });
           }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
