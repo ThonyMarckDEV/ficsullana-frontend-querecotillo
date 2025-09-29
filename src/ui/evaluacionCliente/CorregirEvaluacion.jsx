@@ -7,6 +7,7 @@ import UsuarioForm from './components/Formularios/UsuarioForm';
 import CreditoForm from './components/Formularios/CreditoForm';
 import AvalForm from './components/Formularios/AvalForm';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
+import { toast, ToastContainer } from 'react-toastify';
 
 const CorregirEvaluacion = () => {
   const { dniCliente } = useParams();
@@ -114,11 +115,11 @@ const CorregirEvaluacion = () => {
         ...formData,
         aval: showAval ? formData.aval : null,
       });
-      alert('Evaluación actualizada con éxito');
       navigate('/asesor/evaluaciones-enviadas');
+      toast.success('Evaluacion Actualizada con Exito!!');
     } catch (err) {
       setError(err.message);
-      alert(`Error: ${err.message}`);
+      toast.error(`Error: ${err.message}`);
     } finally {
       setLoading(false);
     }

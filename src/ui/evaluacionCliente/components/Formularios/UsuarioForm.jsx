@@ -243,6 +243,7 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
           value={formData.ctaAhorros || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
+          required
         />
       </div>
       <div>
@@ -253,6 +254,7 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
           value={formData.entidadFinanciera || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
+          required
         />
       </div>
       <div>
@@ -274,6 +276,7 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
           value={formData.direccionCorrespondencia || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
+          required
         />
       </div>
       <div>
@@ -311,6 +314,7 @@ const UsuarioForm = ({ formData, handleInputChange }) => {
           value={formData.referenciaDomicilio || ''}
           onChange={handleInputChange}
           className="w-full p-2 border border-yellow-500 rounded"
+          required
         />
       </div>
       <div>
