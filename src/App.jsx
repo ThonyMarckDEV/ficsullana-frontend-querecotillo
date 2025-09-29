@@ -39,6 +39,7 @@ import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome.j
 import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente.jsx';
 import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin.jsx';
 import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor.jsx';
+import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion.jsx';
 
 
 function AppContent() {
@@ -96,6 +97,7 @@ function AppContent() {
 
         {/* Ruta Evaluación de Cliente */}
         <Route path="evaluacion-cliente" element={<EvaluacionCliente />} />
+        <Route path="evaluacion-cliente/:dniCliente" element={<CorregirEvaluacion />} />
         {/* Ruta para Evaluaciones Enviadas */}
         <Route path="evaluaciones-enviadas" element={<EvaluacionesEnviadas />} />
 
