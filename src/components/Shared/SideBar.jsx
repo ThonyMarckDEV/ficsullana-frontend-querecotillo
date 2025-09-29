@@ -76,12 +76,11 @@ const Sidebar = () => {
         link: '/asesor/dashboard',
       },
       {
-        section: 'Evaluacion Cliente',
-        link: '/asesor/evaluacion-cliente',
-      },
-      {
-        section: 'Mis Solicitudes Enviadas',
-        link: '/asesor/mis-solicitudes-enviadas',
+        section:'Evaluaciones Cliente',
+        subs:[
+          {name:'Evaluar' , link:'/asesor/evaluacion-cliente'},
+          {name:'Evaluaciones Enviadas' ,  link: '/asesor/evaluaciones-enviadas'}
+        ]
       },
     ],
     auditor: [

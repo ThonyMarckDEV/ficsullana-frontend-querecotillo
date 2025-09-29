@@ -7,7 +7,7 @@ import AvalForm from './components/Formularios/AvalForm';
 import CollapsibleSection from './components/CollapsibleSection';
 import createSolicitud from './services/evaluacionClienteService';
 import LoadingScreen from '../../components/Shared/LoadingScreen';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
 
 const EvaluacionCliente = () => {
   const initialFormData = {
@@ -155,7 +155,7 @@ const EvaluacionCliente = () => {
         provinciaAval: formData.provinciaAval,
         departamentoAval: formData.departamentoAval,
         distritoAval: formData.distritoAval,
-        relacionAval: formData.relacionAval,
+        relacionClienteAval: formData.relacionClienteAval,
       };
     }
     
@@ -246,6 +246,7 @@ const EvaluacionCliente = () => {
       </form>
       
       <ViewPdfModal isOpen={modalOpen} onClose={closeModal} pdfUrl={pdfUrl} />
+      <ToastContainer/>
     </div>
   );
 };

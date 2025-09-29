@@ -158,11 +158,11 @@ const AvalForm = ({ formData, handleInputChange }) => {
         <label className="block text-red-700 font-semibold">Relación con el Cliente</label>
         <input
           type="text"
-          name="relacionAval"
-          value={formData.relacionAval || ''}
+          name="relacionClienteAval"
+          value={formData.relacionClienteAval || ''}
           onChange={(e) => {
             const value = e.target.value.replace(/[^A-Za-zÁÉÍÓÚáéíóúÑñ\s]/g, "");
-            handleInputChange({ target: { name: "relacionAval", value } });
+            handleInputChange({ target: { name: "relacionClienteAval", value } });
           }}
           className="w-full p-2 border border-yellow-500 rounded"
           required
