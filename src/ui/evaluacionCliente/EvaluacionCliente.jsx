@@ -4,9 +4,9 @@ import { useNavigate } from 'react-router-dom';
 import createEvaluacion from 'services/evaluacionClienteService';
 import { toast } from 'react-toastify';
 
-import UsuarioForm from './components/Formularios/UsuarioForm'; 
-import CreditoForm from './components/Formularios/CreditoForm';
-import AvalForm from './components/Formularios/AvalForm';
+import UsuarioForm from './components/formularios/UsuarioForm'; 
+import CreditoForm from './components/formularios/CreditoForm';
+import AvalForm from './components/formularios/AvalForm';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 
 import CollapsibleSection from './components/CollapsibleSection'; 

@@ -29,9 +29,9 @@ import Home from './ui/home/Home.jsx';
 // UIS CLIENTE
 
 //UIS ASESOR
-import EvaluacionCliente from './ui/Asesor/evaluacionCliente/EvaluacionCliente.jsx';
-import EvaluacionesEnviadas from './ui/Asesor/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
-import CorregirEvaluacion from './ui/Asesor/evaluacionCliente/CorregirEvaluacion.jsx';
+import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente.jsx';
+import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
+import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion.jsx';
 
 
 // Utilities

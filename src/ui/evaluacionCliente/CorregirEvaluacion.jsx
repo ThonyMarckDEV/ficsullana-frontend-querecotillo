@@ -4,9 +4,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { updateEvaluacion } from 'services/evaluacionClienteService';
 import {buscarClientePorDni} from 'components/Shared/Comboboxes/services/clienteService';
 
-import UsuarioForm from './components/Formularios/UsuarioForm'; 
-import CreditoForm from './components/Formularios/CreditoForm';
-import AvalForm from './components/Formularios/AvalForm';
+import UsuarioForm from './components/formularios/UsuarioForm'; 
+import CreditoForm from './components/formularios/CreditoForm';
+import AvalForm from './components/formularios/AvalForm';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
