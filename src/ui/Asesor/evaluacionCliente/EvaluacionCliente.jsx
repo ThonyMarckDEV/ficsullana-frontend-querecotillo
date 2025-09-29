@@ -151,7 +151,7 @@ const NuevaEvaluacion = () => {
                           <AvalForm formData={formData.aval} handleInputChange={(e) => handleInputChange(e, 'aval')} isDisabled={isClientLocked} />
                         </CollapsibleSection>
                         
-                        <CollapsibleSection title="3. Datos del Crédito (Nueva Evaluación)">
+                        <CollapsibleSection title="3. Datos del Crédito">
                             <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />
                         </CollapsibleSection>
 
