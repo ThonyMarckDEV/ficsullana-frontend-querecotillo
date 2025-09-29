@@ -14,3 +14,5 @@ export const buscarClientePorDni = async (dni) => {
   }
   return result;
 };
+
+export default buscarClientePorDni;

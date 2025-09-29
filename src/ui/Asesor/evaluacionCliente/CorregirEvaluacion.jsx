@@ -1,7 +1,8 @@
 // src/pages/CorregirEvaluacion.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getClienteParaCorregir, updateEvaluacion } from './services/evaluacionClienteService';
+import { updateEvaluacion } from './services/evaluacionClienteService';
+import {buscarClientePorDni} from 'components/Shared/Comboboxes/services/clienteService';
 
 import UsuarioForm from './components/Formularios/UsuarioForm'; 
 import CreditoForm from './components/Formularios/CreditoForm';
@@ -23,7 +24,7 @@ const CorregirEvaluacion = () => {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        const data = await getClienteParaCorregir(dniCliente);
+        const data = await buscarClientePorDni(dniCliente);
         
         const datos = data.datosCliente;
         const contacto = data.datosCliente.contactos[0] || {};
