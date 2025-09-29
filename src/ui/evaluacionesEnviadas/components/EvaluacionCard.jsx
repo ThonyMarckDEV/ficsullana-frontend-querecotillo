@@ -10,7 +10,7 @@ export const EvaluacionCard = ({ evaluacion }) => {
     observaciones, created_at 
   } = evaluacion;
 
-  const nombreCliente = cliente?.datos ? `${cliente.datos.nombre} ${cliente.datos.apellidoPaterno}` : 'Datos del Cliente no encontrados';
+  const nombreCliente = cliente?.datos ? `${cliente.datos.nombre} ${cliente.datos.apellidoPaterno} ${cliente.datos.apellidoMaterno}` : 'Datos del Cliente no encontrados';
   const dniCliente = cliente?.datos ? cliente.datos.dni : 'N/A';
 
   const estadoInfo = {
