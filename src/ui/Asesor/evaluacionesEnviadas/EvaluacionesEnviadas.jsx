@@ -1,6 +1,6 @@
 // src/pages/EvaluacionesEnviadas.jsx (o donde lo tengas)
 import React, { useState, useMemo } from 'react';
-import { getEvaluaciones } from './services/evaluacionService'; 
+import { getEvaluaciones } from 'services/evaluacionClienteService'; 
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import Pagination from './components/Pagination';       
 import { EvaluacionCard } from './components/EvaluacionCard';

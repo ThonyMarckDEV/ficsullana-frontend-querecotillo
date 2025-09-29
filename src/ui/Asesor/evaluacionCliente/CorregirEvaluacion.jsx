@@ -1,7 +1,7 @@
 // src/pages/CorregirEvaluacion.jsx
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { updateEvaluacion } from './services/evaluacionClienteService';
+import { updateEvaluacion } from 'services/evaluacionClienteService';
 import {buscarClientePorDni} from 'components/Shared/Comboboxes/services/clienteService';
 
 import UsuarioForm from './components/Formularios/UsuarioForm'; 

@@ -1,7 +1,7 @@
 // src/pages/NuevaEvaluacion.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import createSolicitud from './services/evaluacionClienteService';
+import createEvaluacion from 'services/evaluacionClienteService';
 import { toast } from 'react-toastify';
 
 import UsuarioForm from './components/Formularios/UsuarioForm'; 
@@ -84,7 +84,7 @@ const NuevaEvaluacion = () => {
         }
         setIsLoading(true);
         try {
-            await createSolicitud(formData, pdfFile);
+            await createEvaluacion(formData, pdfFile);
             toast.success('Nueva evaluación creada con éxito!');
             navigate('/asesor/evaluaciones-enviadas');
         } catch (error) {
