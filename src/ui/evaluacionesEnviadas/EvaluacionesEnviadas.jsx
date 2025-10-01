@@ -1,15 +1,15 @@
-// src/pages/EvaluacionesEnviadas.jsx (o donde lo tengas)
+// src/pages/EvaluacionesEnviadas.jsx (actualizado)
 import React, { useState, useMemo } from 'react';
-import { getEvaluaciones } from 'services/evaluacionClienteService'; 
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import Pagination from './components/Pagination';       
 import { EvaluacionCard } from './components/EvaluacionCard';
+import BuscarEvaluacionesPorDni from 'components/Shared/Comboboxes/BuscarEvaluacionesPorDni';
 
 const ITEMS_PER_PAGE = 3; // Define cuántos items por página
 
 const EvaluacionesEnviadas = () => {
   // Estados para la búsqueda y los datos
-  const [dni, setDni] = useState('');
+  const [dni, setDni] = useState(''); // No usado directamente, pero para compatibilidad
   const [evaluaciones, setEvaluaciones] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,21 +18,18 @@ const EvaluacionesEnviadas = () => {
   // Estados para la paginación de cada sección
   const [pages, setPages] = useState({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
 
-  const handleSearch = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+  const handleEvaluacionesFound = (data, searchDni) => {
+    setEvaluaciones(data || []);
     setHasSearched(true);
+    setError(null);
+    setDni(searchDni); // Opcional
+  };
+
+  const handleClear = () => {
     setEvaluaciones([]);
-    setPages({ pendientes: 1, aceptadas: 1, rechazadas: 1 }); // Resetea las páginas
-    try {
-      const data = await getEvaluaciones(dni);
-      setEvaluaciones(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+    setHasSearched(false);
+    setError(null);
+    setPages({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
   };
   
   // Usamos useMemo para no recalcular esto en cada render
@@ -81,19 +78,12 @@ const EvaluacionesEnviadas = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold text-gray-800 mb-8 border-b pb-4">Buscar Evaluaciones por Cliente</h1>
           
-          {/* Formulario de Búsqueda */}
-          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-4 mb-10 p-6 bg-white rounded-lg shadow-md border border-yellow-500">
-            <input
-              type="number"
-              value={dni}
-              onChange={(e) => setDni(e.target.value.slice(0,9))}
-              placeholder="Ingrese DNI del cliente ( 8 a max. 9 dígitos)"
-              className="w-full p-3 border border-yellow-500 rounded-lg focus:ring-2 focus:ring-red-500 outline-none"
-            />
-            <button type="submit" className="w-full sm:w-auto px-8 py-3 bg-red-700 text-white font-bold rounded-lg hover:bg-red-800 transition-colors">
-              Buscar
-            </button>
-          </form>
+          {/* Componente de Búsqueda */}
+          <BuscarEvaluacionesPorDni 
+            onEvaluacionesFound={handleEvaluacionesFound} 
+            onClear={handleClear}
+            variant="enviadas"
+          />
 
           {/* Mensajes de estado y resultados */}
           {error && <p className="text-center p-10 text-red-500 font-semibold">Error: {error}</p>}
