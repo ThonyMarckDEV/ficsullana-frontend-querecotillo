@@ -7,6 +7,7 @@ import Pagination from './components/Pagination';
 import BuscarEvaluacionesPorDni from 'components/Shared/Comboboxes/BuscarEvaluacionesPorDni';
 import RejectModal from './components/modals/RejectModal';
 import CreditScoreComponent from './components/CreditScoreComponent';
+import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 3;
 
@@ -23,6 +24,7 @@ const EvaluacionesClientes = () => {
   const [rejectReason, setRejectReason] = useState('');
 
   const handleEvaluacionesFound = async (data, searchDni) => {
+    setLoading(true);
     setEvaluaciones(data || []);
     setHasSearched(true);
     setError(null);
@@ -37,6 +39,7 @@ const EvaluacionesClientes = () => {
     } else {
       setClienteData(null);
     }
+    setLoading(false);
   };
 
   const handleClear = () => {
@@ -48,14 +51,17 @@ const EvaluacionesClientes = () => {
   };
 
   const handleApprove = async (evaluacionId) => {
+    setLoading(true);
     try {
       await updateStatusEvaluacion(evaluacionId, { estado: 1 });
       setEvaluaciones(evaluaciones.map(e => 
         e.id === evaluacionId ? { ...e, estado: 1, observaciones: null } : e
       ));
-      alert('Evaluación aprobada exitosamente.');
+      toast.success('Evaluación aprobada exitosamente.');
     } catch (err) {
-      alert('Error al aprobar: ' + (err.message || 'Intente nuevamente.'));
+      toast.error('Error al aprobar: ' + (err.message || 'Intente nuevamente.'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,6 +76,7 @@ const EvaluacionesClientes = () => {
       alert('Especifique un motivo para el rechazo.');
       return;
     }
+    setLoading(true);
     try {
       await updateStatusEvaluacion(selectedEvaluacion.id, { 
         estado: 2, 
@@ -81,9 +88,11 @@ const EvaluacionesClientes = () => {
       setShowRejectModal(false);
       setRejectReason('');
       setSelectedEvaluacion(null);
-      alert('Evaluación rechazada exitosamente.');
+      toast.success('Evaluación rechazada exitosamente.');
     } catch (err) {
-      alert('Error al rechazar: ' + (err.message || 'Intente nuevamente.'));
+      toast.error('Error al rechazar: ' + (err.message || 'Intente nuevamente.'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -135,14 +144,16 @@ const EvaluacionesClientes = () => {
                     <button 
                       onClick={() => handleApprove(eva.id)}
                       className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                      disabled={loading}
                     >
-                      Aprobar
+                      {loading ? 'Procesando...' : 'Aprobar'}
                     </button>
                     <button 
                       onClick={() => openRejectModal(eva)}
                       className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      disabled={loading}
                     >
-                      Rechazar
+                      {loading ? 'Procesando...' : 'Rechazar'}
                     </button>
                   </div>
                 )}
