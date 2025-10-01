@@ -13,6 +13,8 @@ import CollapsibleSection from './components/CollapsibleSection';
 import ViewPdfModal from 'components/Shared/Modals/ViewPdfModal';  
 import BuscarClientePorDni from 'components/Shared/Comboboxes/BuscarClientePorDni';
 
+import { useToast } from 'components/Shared/Errors/ToastNotification';
+
 const initialState = {
     usuario: {},
     credito: {},
@@ -26,6 +28,8 @@ const NuevaEvaluacion = () => {
     const [isClientLocked, setIsClientLocked] = useState(false);
     const [pdfFile, setPdfFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const { showToast } = useToast();
     
     // --- NUEVOS ESTADOS PARA EL MODAL ---
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -83,12 +87,16 @@ const NuevaEvaluacion = () => {
             return;
         }
         setIsLoading(true);
-        try {
+       try {
             await createEvaluacion(formData, pdfFile);
-            toast.success('Nueva evaluación creada con éxito!');
+            
+            // Éxito: Usamos showToast
+            showToast({ msg: 'Nueva evaluación creada con **éxito**!' }, 'success');
             navigate('/asesor/evaluaciones-enviadas');
+            
         } catch (error) {
-            toast.error(`Error: ${error.message}`);
+            // Fallo: 'error' contiene el objeto JSON del backend que queremos mostrar
+            showToast(error, 'error'); 
         } finally {
             setIsLoading(false);
         }
