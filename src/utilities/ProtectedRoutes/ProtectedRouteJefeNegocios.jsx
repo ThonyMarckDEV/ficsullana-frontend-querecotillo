@@ -2,7 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import jwtUtils from 'utilities/jwtUtils';
 
-const ProtectedRouteManager = ({ element }) => {
+const ProtectedRouteJefeNegocios = ({ element }) => {
   // Obtener el JWT desde localStorage
   const refresh_token = jwtUtils.getRefreshTokenFromCookie();
 
@@ -13,7 +13,7 @@ const ProtectedRouteManager = ({ element }) => {
 
   const rol = jwtUtils.getUserRole(refresh_token);
 
-  if (rol !== 'admin') {
+  if (rol !== 'jefe_negocios') {
     return <Navigate to="/404" />;
   }
 
@@ -22,4 +22,4 @@ const ProtectedRouteManager = ({ element }) => {
 
 };
 
-export default ProtectedRouteManager;
+export default ProtectedRouteJefeNegocios;

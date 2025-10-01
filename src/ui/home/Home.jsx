@@ -59,6 +59,12 @@ const Home = () => {
         </p>
       )}
 
+      {rol === "jefe_negocios" && (
+        <p className="mt-4 text-gray-500 font-semibold">
+          Herramientas de jefe negocios.
+        </p>
+      )}
+
       {!rol && (
         <p className="mt-4 text-red-600 font-semibold">
           No se encontró un rol válido.

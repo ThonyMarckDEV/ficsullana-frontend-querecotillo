@@ -76,9 +76,9 @@ const Sidebar = () => {
         link: '/asesor/dashboard',
       },
       {
-        section:'Evaluaciones Cliente',
+        section:'Evaluaciones',
         subs:[
-          {name:'Evaluar' , link:'/asesor/evaluacion-cliente'},
+          {name:'Evaluar Cliente' , link:'/asesor/evaluacion-cliente'},
           {name:'Evaluaciones Enviadas' ,  link: '/asesor/evaluaciones-enviadas'}
         ]
       },
@@ -115,6 +115,14 @@ const Sidebar = () => {
           { name: 'Team List', link: '/encargado/teams/list' },
           { name: 'Assign Tasks', link: '/encargado/teams/tasks' },
         ],
+      },
+    ],
+      jefe_negocios: [
+      {
+        section:'Evaluaciones',
+        subs:[
+          {name:'Evaluaciones Clientes' ,  link: '/jefe-negocios/evaluaciones-clientes'}
+        ]
       },
     ],
   };

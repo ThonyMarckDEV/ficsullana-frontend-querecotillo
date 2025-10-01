@@ -70,6 +70,10 @@ const Login = () => {
           toast.success(`Login exitoso!!`);
           setTimeout(() => navigate('/cajero'), 1500);
           break;
+        case 'jefe_negocios':
+          toast.success(`Login exitoso!!`);
+          setTimeout(() => navigate('/jefe-negocios'), 1500);
+          break;   
         default:
           console.error('Rol no reconocido:', rol);
           toast.error(`Rol no reconocido: ${rol}`);

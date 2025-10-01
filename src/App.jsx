@@ -10,15 +10,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 // Layout
-import SidebarLayout from "./layouts/SidebarLayout.jsx";
+import SidebarLayout from "./layouts/SidebarLayout";
 
 // UIS AUTH
-import ErrorPage404 from './components/ErrorPage404.jsx';
+import ErrorPage404 from './components/ErrorPage404';
 import ErrorPage401 from './components/ErrorPage401';
-import Login from './ui/auth/Login/Login.jsx';
+import Login from './ui/auth/Login/Login';
 
 //UI HOME
-import Home from './ui/home/Home.jsx';
+import Home from './ui/home/Home';
 
 //UIS SUPERADMIN
 
@@ -29,16 +29,20 @@ import Home from './ui/home/Home.jsx';
 // UIS CLIENTE
 
 //UIS ASESOR
-import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente.jsx';
-import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas.jsx';
-import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion.jsx';
+import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente';
+import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas';
+import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion';
+
+//UIS JEFE NEGOCIOS
+import EvaluacionesClientes from './ui/evaluacionesClientes/EvaluacionesClientes';
 
 
 // Utilities
-import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome.jsx';
-import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente.jsx';
-import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin.jsx';
-import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor.jsx';
+import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome';
+import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente';
+import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin';
+import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor';
+import ProtectedRouteJefeNegocios from './utilities/ProtectedRoutes/ProtectedRouteJefeNegocios';
 
 
 
@@ -58,7 +62,7 @@ function AppContent() {
           <ProtectedRouteSuperAdmin element={<SidebarLayout />} />
         }
       >
-        {/* Ruta Home (cuando solo pones /cliente) */}
+        {/* Ruta Home (cuando solo pones /superadmin) */}
         <Route index element={<Home />} />
 
         {/* Ruta Solicitar Préstamo */}
@@ -92,7 +96,7 @@ function AppContent() {
           <ProtectedRouteAsesor element={<SidebarLayout />} />
         }
       >
-        {/* Ruta Home (cuando solo pones /cliente) */}
+        {/* Ruta Home (cuando solo pones /asesor) */}
         <Route index element={<Home />} />
 
         {/* Ruta Evaluación de Cliente */}
@@ -102,6 +106,23 @@ function AppContent() {
         <Route path="evaluaciones-enviadas" element={<EvaluacionesEnviadas />} />
 
       </Route>
+
+
+      {/* RUTAS JEFE NEGOCIOS */}
+      <Route
+        path="/jefe-negocios"
+        element={
+          <ProtectedRouteJefeNegocios element={<SidebarLayout />} />
+        }
+      >
+        {/* Ruta Home (cuando solo pones /jefe-negocios) */}
+        <Route index element={<Home />} />
+
+        {/* Ruta Evaluaciones de Clientes */}
+        <Route path="evaluaciones-clientes" element={<EvaluacionesClientes />} />
+
+      </Route>
+
 
 
 
