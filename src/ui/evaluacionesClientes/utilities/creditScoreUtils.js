@@ -1,4 +1,4 @@
-// src/utilities/creditScoreUtils.js (FINALIZADO PARA COINCIDIR CON EL JSON)
+// src/utilities/creditScoreUtils.js (CORREGIDO)
 export const calculateCreditScore = (data) => {
   if (!data || !data.datosCliente) return { score: 0, details: [] };
   let score = 0;
@@ -14,8 +14,11 @@ export const calculateCreditScore = (data) => {
   if (monthDiff < 0 || (monthDiff === 0 && now.getDate() < birthDate.getDate())) age--;
   let agePoints = 0;
   let ageReason = '';
+  // === LÓGICA DE EDAD CORREGIDA ===
+  // El cliente Anthony (28 años) cae en este rango, debe obtener 20 puntos.
   if (age >= 25 && age <= 60) {
     agePoints = 20;
+    ageReason = `Edad ideal (${age} años)`; // Agregado para claridad
   } else if (age > 60 && age <= 70) {
     agePoints = -10;
     ageReason = 'Edad avanzada (61-70 años)';
@@ -23,6 +26,7 @@ export const calculateCreditScore = (data) => {
     agePoints = -30;
     ageReason = `Edad muy joven o avanzada (${age} años)`;
   }
+  // ==================================
   score += agePoints;
   details.push({ factor: 'Edad', points: agePoints, reason: ageReason });
 
@@ -237,6 +241,7 @@ export const calculateCreditScore = (data) => {
   details.push({ factor: 'RUC', points: rucPoints, reason: rucReason });
 
   // Normalizar
+  // El puntaje real ahora es 80. Lo mantenemos en el rango 0-100.
   score = Math.max(0, Math.min(100, score));
 
   return { score, details };

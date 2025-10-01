@@ -3,110 +3,86 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { calculateCreditScore } from '../utilities/creditScoreUtils';
 
 const CreditScoreComponent = ({ clienteData }) => {
+  // --- 1. Hooks: Estado y Referencias ---
   const [showTooltip, setShowTooltip] = useState(false);
-  const [tooltipStyle, setTooltipStyle] = useState({}); // Usamos un objeto de estilo para la posición
+  const [tooltipStyle, setTooltipStyle] = useState({});
   const tooltipRef = useRef(null);
   const triggerRef = useRef(null);
 
+  // --- 2. Datos Derivados ---
   const result = calculateCreditScore(clienteData);
-  const score = result.score;
-  const details = result.details || [];
-  const scoreColor = score > 70 ? 'text-green-600' : score > 40 ? 'text-orange-600' : 'text-red-600';
-  const scoreText = score > 70 ? 'Alta Confiabilidad' : score > 40 ? 'Confiabilidad Media' : 'Baja Confiabilidad';
+  const { score, details = [] } = result;
+  const rawScore = details.reduce((sum, detail) => sum + detail.points, 0);
 
-  // Función de ajuste de posición, memorizada con useCallback
-  const adjustTooltipPosition = useCallback(() => {
-    if (!showTooltip || !tooltipRef.current || !triggerRef.current) return;
-
-    const tooltipRect = tooltipRef.current.getBoundingClientRect();
-    const triggerRect = triggerRef.current.getBoundingClientRect();
-    const scrollX = window.scrollX || window.pageXOffset;
-    const scrollY = window.scrollY || window.pageYOffset;
-    const padding = 10; // Margen de la ventana
-
-    // 1. Posición inicial: Centrado horizontalmente sobre el trigger.
-    let targetX = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2) + scrollX;
-    // 2. Posición vertical inicial: Encima del trigger.
-    let targetY = triggerRect.top - tooltipRect.height - padding + scrollY;
-    let flip = false;
-    
-    // --- Ajustes dinámicos ---
-
-    // 3. Ajuste Horizontal (evitar desbordamiento a los lados)
-    if (targetX + tooltipRect.width > window.innerWidth + scrollX - padding) {
-      targetX = window.innerWidth + scrollX - tooltipRect.width - padding;
-    }
-    if (targetX < scrollX + padding) {
-      targetX = scrollX + padding;
-    }
-
-    // 4. Ajuste Vertical (Comprobar desbordamiento superior y voltear si es necesario)
-    if (targetY < scrollY + padding) {
-      // Si desborda por arriba, voltear para que aparezca debajo
-      targetY = triggerRect.bottom + padding + scrollY;
-      flip = true;
-    }
-
-    // 5. Si está volteado (debajo) y desborda por abajo, ajustarlo hacia arriba
-    if (flip && targetY + tooltipRect.height > window.innerHeight + scrollY - padding) {
-        // En un caso extremo (trigger cerca del fondo), lo ajustamos al máximo posible
-        targetY = window.innerHeight + scrollY - tooltipRect.height - padding;
-    }
-
-    setTooltipStyle({ 
-      left: targetX, 
-      top: targetY, 
-      // Opcional: añadir una clase para cambiar el estilo de la flecha si se voltea
-      // flip: flip 
-    });
-  }, [showTooltip]);
-
-  // Ejecuta la función de ajuste cada vez que showTooltip cambie
-  useEffect(() => {
-    // Si se muestra, ajusta la posición
-    if (showTooltip) {
-      adjustTooltipPosition();
-      // Además, si el tamaño de la ventana cambia mientras está abierto, re-ajusta
-      window.addEventListener('resize', adjustTooltipPosition);
-    }
-    
-    // Cleanup: remueve el listener
-    return () => {
-      window.removeEventListener('resize', adjustTooltipPosition);
-    };
-  }, [showTooltip, adjustTooltipPosition]); // Depende de showTooltip y de la función adjustTooltipPosition
-
-  // Manejadores de eventos (más limpios)
-  const handleToggle = (e) => {
-    e.stopPropagation();
-    setShowTooltip(prev => !prev);
+  const getScorePresentation = (s) => {
+    if (s > 70) return { color: 'text-green-600', text: 'Alta Confiabilidad' };
+    if (s > 40) return { color: 'text-orange-600', text: 'Confiabilidad Media' };
+    return { color: 'text-red-600', text: 'Baja Confiabilidad' };
   };
-  
-  // Para mouseEnter/Leave, solo mostramos/ocultamos si no está activo (opcional, para evitar que se cierre inmediatamente al mover el mouse si se abrió con click)
-  const handleMouseEnter = () => setShowTooltip(true);
-  const handleMouseLeave = () => setShowTooltip(false);
+  const { color: scoreColor, text: scoreText } = getScorePresentation(score);
 
-  // Close on outside click (Mantener como estaba, es correcto)
+  // --- 3. Lógica de Posicionamiento del Tooltip ---
+  const adjustTooltipPosition = useCallback(() => {
+    if (!triggerRef.current || !tooltipRef.current) return;
+    const triggerRect = triggerRef.current.getBoundingClientRect();
+    const tooltipRect = tooltipRef.current.getBoundingClientRect();
+    const VIEWPORT_PADDING = 10;
+
+    let top = triggerRect.top - tooltipRect.height - VIEWPORT_PADDING;
+    let left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
+
+    if (left < VIEWPORT_PADDING) left = VIEWPORT_PADDING;
+    if (left + tooltipRect.width > window.innerWidth - VIEWPORT_PADDING) {
+      left = window.innerWidth - tooltipRect.width - VIEWPORT_PADDING;
+    }
+    if (top < VIEWPORT_PADDING) top = triggerRect.bottom + VIEWPORT_PADDING;
+    if (top + tooltipRect.height > window.innerHeight - VIEWPORT_PADDING) {
+      top = window.innerHeight - tooltipRect.height - VIEWPORT_PADDING;
+    }
+    setTooltipStyle({ top: `${top}px`, left: `${left}px` });
+  }, []);
+
+  // --- 4. Efectos ---
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (showTooltip && triggerRef.current && !triggerRef.current.contains(e.target) && tooltipRef.current && !tooltipRef.current.contains(e.target)) {
+    if (showTooltip) {
+      requestAnimationFrame(() => {
+        adjustTooltipPosition();
+      });
+      window.addEventListener('resize', adjustTooltipPosition);
+      window.addEventListener('scroll', adjustTooltipPosition, true);
+      return () => {
+        window.removeEventListener('resize', adjustTooltipPosition);
+        window.removeEventListener('scroll', adjustTooltipPosition, true);
+      };
+    }
+  }, [showTooltip, adjustTooltipPosition]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (
+        tooltipRef.current && !tooltipRef.current.contains(event.target) &&
+        triggerRef.current && !triggerRef.current.contains(event.target)
+      ) {
         setShowTooltip(false);
       }
     };
-    if (showTooltip) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
+    if (showTooltip) document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showTooltip]);
 
+  // --- 5. Manejador de Eventos (Solo Clic) ---
+  const handleToggle = (e) => {
+    e.stopPropagation();
+    setShowTooltip((prev) => !prev);
+  };
+
+  // --- 6. Renderizado del Componente ---
   return (
     <div className="relative">
-      <div 
+      <div
         ref={triggerRef}
         className="cursor-pointer inline-flex items-center gap-2"
-        onMouseEnter={handleMouseEnter} // Puedes remover este si prefieres solo click
-        onMouseLeave={handleMouseLeave} // Puedes remover este si prefieres solo click
-        onClick={handleToggle} // Usar handleToggle para un click universal
+        onClick={handleToggle} // ÚNICO EVENTO PARA MOSTRAR/OCULTAR
       >
         <span className={`text-lg font-bold ${scoreColor}`}>
           Credit Score: {score}/100 - {scoreText}
@@ -115,24 +91,32 @@ const CreditScoreComponent = ({ clienteData }) => {
       </div>
 
       {showTooltip && (
-        // Posicionamiento absoluto y fijo para que flote correctamente sobre el contenido
-        <div 
+        <div
           ref={tooltipRef}
-          className="fixed bg-white border border-gray-300 rounded-lg shadow-xl p-4 z-50 whitespace-pre-wrap min-w-[320px] max-w-[400px] max-h-[500px] overflow-y-auto"
-          style={{ 
-            left: tooltipStyle.left, 
-            top: tooltipStyle.top,
-            // Importante: usar 'fixed' para que las coordenadas de window.scrollY/X funcionen bien
-            position: 'fixed', 
-            transform: 'translate(0, 0)' // Resetear transformaciones
-          }}
+          style={tooltipStyle}
+          className="fixed bg-white border border-gray-300 rounded-lg shadow-xl p-4 z-50 min-w-[320px] max-w-[400px] max-h-[500px] overflow-y-auto"
         >
-          <h4 className="font-semibold mb-3 text-sm border-b pb-1">Desglose del Credit Score:</h4>
+          <h4 className="font-semibold mb-3 text-sm border-b pb-1">
+            Desglose del Credit Score:
+          </h4>
+          <div className="mb-3 text-sm text-center">
+            <strong className="text-2xl">{rawScore}</strong> puntos brutos
+            <br />
+            <span className="text-xs text-gray-500">(Normalizado a {score}/100)</span>
+          </div>
           <ul className="text-sm space-y-2">
             {details.map((detail, index) => (
-              <li key={index} className={`${detail.points >= 0 ? 'text-green-700' : 'text-red-700'} flex justify-between`}>
+              <li
+                key={index}
+                className={`flex justify-between ${detail.points >= 0 ? 'text-green-700' : 'text-red-700'}`}
+              >
                 <span>{detail.factor}:</span>
-                <span>{detail.points} pts {detail.reason && <span className="text-xs italic">({detail.reason})</span>}</span>
+                <span className="font-mono">
+                  {detail.points > 0 && '+'}{detail.points} pts
+                  {detail.reason && (
+                    <span className="text-xs italic text-gray-500 ml-1">({detail.reason})</span>
+                  )}
+                </span>
               </li>
             ))}
           </ul>
