@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { toast } from 'react-toastify';
-import { buscarClientePorDni } from './services/clienteService';
+import { showClientByDNI } from 'services/clienteService';
 
 const BuscarClientePorDni = ({ onClientFound, onClear }) => {
     const [dni, setDni] = useState('');
@@ -13,7 +13,7 @@ const BuscarClientePorDni = ({ onClientFound, onClear }) => {
         }
         setLoading(true);
         try {
-            const data = await buscarClientePorDni(dni);
+            const data = await showClientByDNI(dni);
             toast.success('Cliente encontrado. Se han cargado sus datos.');
             if (onClientFound) onClientFound(data);
         } catch (error) {

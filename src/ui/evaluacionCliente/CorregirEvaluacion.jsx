@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { updateEvaluacion } from 'services/evaluacionClienteService';
-import {buscarClientePorDni} from 'components/Shared/Comboboxes/services/clienteService';
+import {showClientByDNI} from 'services/clienteService';
 
 import UsuarioForm from './components/formularios/UsuarioForm'; 
 import CreditoForm from './components/formularios/CreditoForm';
@@ -24,7 +24,7 @@ const CorregirEvaluacion = () => {
     const cargarDatos = async () => {
       try {
         setLoading(true);
-        const data = await buscarClientePorDni(dniCliente);
+        const data = await showClientByDNI(dniCliente);
         
         const datos = data.datosCliente;
         const contacto = data.datosCliente.contactos[0] || {};
