@@ -15,10 +15,10 @@ export const calculateCreditScore = (data) => {
   let agePoints = 0;
   let ageReason = '';
   // === LÓGICA DE EDAD CORREGIDA ===
-  // El cliente Anthony (28 años) cae en este rango, debe obtener 20 puntos.
+  // El cliente X (28 años) cae en este rango, debe obtener 20 puntos.
   if (age >= 25 && age <= 60) {
     agePoints = 20;
-    ageReason = `Edad ideal (${age} años)`; // Agregado para claridad
+    ageReason = `Edad ideal (${age} años)`;
   } else if (age > 60 && age <= 70) {
     agePoints = -10;
     ageReason = 'Edad avanzada (61-70 años)';

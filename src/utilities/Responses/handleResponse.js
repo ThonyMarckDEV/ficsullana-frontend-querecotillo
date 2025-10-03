@@ -1,20 +1,27 @@
 /**
- * Función utilitaria para manejar la respuesta de las llamadas a fetch.
- * Lee el cuerpo de la respuesta como JSON y lanza el objeto completo
- * si el estado HTTP no es satisfactorio (response.ok es false).
- * * @param {Response} response - La promesa de respuesta devuelta por fetch.
- * @returns {Promise<Object>} El cuerpo de la respuesta parseado como JSON.
- * @throws {Object} El objeto JSON de la respuesta de error del servidor.
+ * Procesa la respuesta de fetch y la ESTANDARIZA.
+ * Siempre devuelve o lanza un objeto con un formato predecible.
  */
 export const handleResponse = async (response) => {
-    // Siempre leemos el cuerpo de la respuesta, sin importar el estado.
-    const result = await response.json(); 
+    const result = await response.json();
 
     if (!response.ok) {
-        // Lanzamos el objeto JSON directamente para que el catch del componente
-        // reciba el objeto de error del backend (ej: { msg: "...", errors: "..." })
-        throw result; 
+        // La lógica de error ya está bien, no necesita cambios.
+        const error = {
+            type: 'error',
+            message: result.message || 'Ocurrió un error inesperado.',
+            details: result.errors ? Object.values(result.errors).flat() : undefined,
+        };
+        throw error;
     }
 
-    return result;
+    // ÉXITO: Crea y devuelve nuestro objeto de éxito estándar.
+    const success = {
+        type: 'success',
+        message: result.message || 'Operación realizada con éxito.',
+        data: result.data,
+        pagination: result.pagination,
+        summary: result.summary,
+    };
+    return success;
 };
