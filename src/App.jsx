@@ -10,15 +10,15 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 
 // Layout
-import SidebarLayout from "./layouts/SidebarLayout";
+import SidebarLayout from "layouts/SidebarLayout";
 
 // UIS AUTH
-import ErrorPage404 from './components/ErrorPage404';
-import ErrorPage401 from './components/ErrorPage401';
-import Login from './ui/auth/Login/Login';
+import ErrorPage404 from 'components/ErrorPage404';
+import ErrorPage401 from 'components/ErrorPage401';
+import Login from 'ui/auth/Login/Login';
 
 //UI HOME
-import Home from './ui/home/Home';
+import Home from 'ui/home/Home';
 
 //UIS SUPERADMIN
 
@@ -29,20 +29,20 @@ import Home from './ui/home/Home';
 // UIS CLIENTE
 
 //UIS ASESOR
-import EvaluacionCliente from './ui/evaluacionCliente/EvaluacionCliente';
-import EvaluacionesEnviadas from './ui/evaluacionesEnviadas/EvaluacionesEnviadas';
-import CorregirEvaluacion from './ui/evaluacionCliente/CorregirEvaluacion';
+import EvaluacionCliente from 'ui/Asesor/evaluacionCliente/EvaluacionCliente';
+import EvaluacionesEnviadas from 'ui/Asesor/evaluacionesEnviadas/EvaluacionesEnviadas';
+import CorregirEvaluacion from 'ui/Asesor/evaluacionCliente/CorregirEvaluacion';
 
 //UIS JEFE NEGOCIOS
-import EvaluacionesClientes from './ui/evaluacionesClientes/EvaluacionesClientes';
+import EvaluacionesClientes from 'ui/JefeNegocios/evaluacionesClientes/EvaluacionesClientes';
 
 
 // Utilities
-import ProtectedRouteHome from './utilities/ProtectedRoutes/ProtectedRouteHome';
-import ProtectedRouteCliente from './utilities/ProtectedRoutes/ProtectedRouteCliente';
-import ProtectedRouteSuperAdmin from './utilities/ProtectedRoutes/ProtectedRouteSuperAdmin';
-import ProtectedRouteAsesor from './utilities/ProtectedRoutes/ProtectedRouteAsesor';
-import ProtectedRouteJefeNegocios from './utilities/ProtectedRoutes/ProtectedRouteJefeNegocios';
+import ProtectedRouteHome from 'utilities/ProtectedRoutes/ProtectedRouteHome';
+import ProtectedRouteCliente from 'utilities/ProtectedRoutes/ProtectedRouteCliente';
+import ProtectedRouteSuperAdmin from 'utilities/ProtectedRoutes/ProtectedRouteSuperAdmin';
+import ProtectedRouteAsesor from 'utilities/ProtectedRoutes/ProtectedRouteAsesor';
+import ProtectedRouteJefeNegocios from 'utilities/ProtectedRoutes/ProtectedRouteJefeNegocios';
 
 
 
