@@ -60,4 +60,25 @@ export const getEvaluaciones = async (dni) => {
     return handleResponse(response);
 };
 
+
+/**
+ * Corrige los datos específicos de una evaluación.
+ * @param {number} evaluacionId - El ID de la evaluación a corregir.
+ * @param {object} data - Los datos a actualizar.
+ * @returns {Promise<any>}
+ */
+export const correctEvaluacion = async (evaluacionId, data) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/correct/${evaluacionId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    // Usamos la misma utilidad de manejo de respuestas
+    return handleResponse(response);
+};
+
 export default createEvaluacion;

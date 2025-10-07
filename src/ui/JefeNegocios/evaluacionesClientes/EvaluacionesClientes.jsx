@@ -1,13 +1,15 @@
 // src/pages/EvaluacionesClientes.jsx
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { getEvaluaciones, updateStatusEvaluacion } from 'services/evaluacionClienteService'; 
 import { showClientByDNI } from 'services/clienteService';
 import LoadingScreen from 'components/Shared/LoadingScreen';
-import Pagination from './components/Pagination';       
+import Pagination from './components/Pagination'; 
 import BuscarEvaluacionesPorDni from 'components/Shared/Comboboxes/BuscarEvaluacionesPorDni';
 import RejectModal from './components/modals/RejectModal';
 import CreditScoreComponent from './components/CreditScoreComponent';
 import { toast } from 'react-toastify';
+// ¡Importa el nuevo componente!
+import EvaluacionDetailComponent from './components/EvaluacionDetailComponent';
 
 const ITEMS_PER_PAGE = 3;
 
@@ -24,6 +26,7 @@ const EvaluacionesClientes = () => {
   const [rejectReason, setRejectReason] = useState('');
 
   const handleEvaluacionesFound = async (data, searchDni) => {
+    // ... (sin cambios en esta función)
     setLoading(true);
     setEvaluaciones(data || []);
     setHasSearched(true);
@@ -42,7 +45,24 @@ const EvaluacionesClientes = () => {
     setLoading(false);
   };
 
+  // Función para recargar los datos después de una corrección exitosa
+  const handleUpdateSuccess = useCallback(async () => {
+    if (!dni) return;
+    setLoading(true);
+    try {
+        const data = await getEvaluaciones(dni);
+        // Usamos la función existente para actualizar el estado
+        handleEvaluacionesFound(data, dni);
+        toast.info("Datos de evaluaciones actualizados.");
+    } catch (err) {
+        toast.error("Error al refrescar los datos: " + (err.message || ''));
+    } finally {
+        setLoading(false);
+    }
+  }, [dni]); // Se vuelve a crear solo si el DNI cambia
+
   const handleClear = () => {
+    // ... (sin cambios)
     setEvaluaciones([]);
     setClienteData(null);
     setHasSearched(false);
@@ -51,6 +71,7 @@ const EvaluacionesClientes = () => {
   };
 
   const handleApprove = async (evaluacionId) => {
+    // ... (sin cambios)
     setLoading(true);
     try {
       await updateStatusEvaluacion(evaluacionId, { estado: 1 });
@@ -66,12 +87,14 @@ const EvaluacionesClientes = () => {
   };
 
   const openRejectModal = (evaluacion) => {
+    // ... (sin cambios)
     setSelectedEvaluacion(evaluacion);
     setRejectReason('');
     setShowRejectModal(true);
   };
 
   const handleReject = async () => {
+    // ... (sin cambios)
     if (!rejectReason.trim()) {
       alert('Especifique un motivo para el rechazo.');
       return;
@@ -97,6 +120,7 @@ const EvaluacionesClientes = () => {
   };
 
   const handleCloseModal = () => {
+    // ... (sin cambios)
     setShowRejectModal(false);
     setRejectReason('');
     setSelectedEvaluacion(null);
@@ -108,6 +132,7 @@ const EvaluacionesClientes = () => {
     rechazadas: evaluaciones.filter(e => e.estado === 2),
   }), [evaluaciones]);
 
+  // ####### SECCIÓN MODIFICADA #######
   const renderSection = (title, data, type) => {
     const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
     const currentPage = pages[type];
@@ -130,34 +155,16 @@ const EvaluacionesClientes = () => {
         {currentData.length > 0 ? (
           <>
             {currentData.map(eva => (
-              <div key={eva.id} className="bg-white p-6 rounded-lg shadow-md mb-4 border-l-4 border-l-yellow-500">
-                <h3 className="text-lg font-bold mb-2">{eva.producto}</h3>
-                <p className="text-gray-700 mb-2"><strong>Monto:</strong> S/ {eva.montoPrestamo}</p>
-                <p className="text-gray-700 mb-2"><strong>Cuotas:</strong> {eva.cuotas}</p>
-                <p className="text-gray-700 mb-2"><strong>Tasa de Interés:</strong> {eva.tasaInteres}%</p>
-                <p className="text-gray-700 mb-2"><strong>Destino:</strong> {eva.destinoCredito}</p>
-                {eva.observaciones && (
-                  <p className="text-red-600 mt-2"><strong>Observaciones:</strong> {eva.observaciones}</p>
-                )}
-                {type === 'pendientes' && (
-                  <div className="mt-4 flex gap-2">
-                    <button 
-                      onClick={() => handleApprove(eva.id)}
-                      className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
-                      disabled={loading}
-                    >
-                      {loading ? 'Procesando...' : 'Aprobar'}
-                    </button>
-                    <button 
-                      onClick={() => openRejectModal(eva)}
-                      className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-                      disabled={loading}
-                    >
-                      {loading ? 'Procesando...' : 'Rechazar'}
-                    </button>
-                  </div>
-                )}
-              </div>
+              // Usamos el nuevo componente aquí
+              <EvaluacionDetailComponent
+                  key={eva.id}
+                  evaluacion={eva}
+                  onUpdateSuccess={handleUpdateSuccess}
+                  onApprove={handleApprove}
+                  onReject={openRejectModal}
+                  isLoading={loading}
+                  isPending={type === 'pendientes'}
+              />
             ))}
             <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
           </>
@@ -173,6 +180,7 @@ const EvaluacionesClientes = () => {
       {loading && <LoadingScreen />}
       <div className="bg-gray-50 min-h-screen p-4 sm:p-8">
         <div className="max-w-4xl mx-auto">
+          {/* ... (resto del JSX sin cambios) */}
           <h1 className="text-4xl font-bold text-gray-800 mb-8 border-b pb-4">Gestión de Evaluaciones - Jefe de Negocios</h1>
           
           <BuscarEvaluacionesPorDni 
