@@ -27,6 +27,7 @@ import Home from 'ui/home/Home';
 
 
 // UIS CLIENTE
+import MisEvaluacionesCliente from 'ui/Cliente/misEvaluaciones/MisEvaluaciones';
 
 //UIS ASESOR
 import EvaluacionCliente from 'ui/Asesor/evaluacionCliente/EvaluacionCliente';
@@ -84,7 +85,9 @@ function AppContent() {
         {/* Ruta Home (cuando solo pones /cliente) */}
         <Route index element={<Home />} />
 
-        {/* Aquí agregas más módulos */}
+       
+        {/* Ruta para ver mis evaluaciones */}
+         <Route path="mis-evaluaciones" element={<MisEvaluacionesCliente />} />
 
       </Route>
 

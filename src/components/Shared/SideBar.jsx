@@ -59,16 +59,11 @@ const Sidebar = () => {
         link: '/cliente',
       },
       {
-        section: 'Solicitud Préstamos',
+        section: 'Evaluaciones',
         subs: [
-          { name: 'Solicitar', link: '/cliente/solicitar-prestamo' },
-          { name: 'Mis Solicitudes', link: '/cliente/mis-solicitudes' },
+          { name: 'Mis Evaluaciones', link: '/cliente/mis-evaluaciones' },
         ],
-      },
-      {
-        section: 'Support',
-        link: '/cliente/support',
-      },
+      }
     ],
     asesor: [
       {
