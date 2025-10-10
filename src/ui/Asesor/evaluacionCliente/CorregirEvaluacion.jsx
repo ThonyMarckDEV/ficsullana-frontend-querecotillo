@@ -140,10 +140,16 @@ const CorregirEvaluacion = () => {
             <h2 className="text-2xl font-semibold text-red-700 mb-4">1. Datos del Cliente</h2>
             {formData && <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} />}
           </div>
-          <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
-            <h2 className="text-2xl font-semibold text-red-700 mb-4">2. Datos del Crédito</h2>
-            {formData && <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />}
-          </div>
+           <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
+            <h2 className="text-2xl font-semibold text-red-700 mb-4">2. Datos del Crédito</h2>
+            {formData && (
+              <CreditoForm 
+                formData={formData.credito} 
+                handleInputChange={(e) => handleInputChange(e, 'credito')} 
+                isEditable={false}
+              />
+            )}
+          </div>
           <div className="p-6 bg-white rounded-lg shadow-md border border-yellow-500 mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-semibold text-red-700">3. Datos del Aval</h2>

@@ -1,7 +1,8 @@
 // src/components/CreditoForm.jsx
 import React from 'react';
 
-const CreditoForm = ({ formData, handleInputChange }) => {
+//                                                            <-- CAMBIA ESTA LÍNEA
+const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -11,18 +12,21 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="producto"
           value={formData.producto || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable} // Esta lógica ahora funciona perfecto
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         />
       </div>
-      <div>
+      {/* ... el resto de los inputs no cambian, ya que todos dependen de "isEditable" ... */}
+       <div>
         <label className="block text-red-700 font-semibold">Monto del Préstamo</label>
         <input
           type="number"
           name="montoPrestamo"
           value={formData.montoPrestamo || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         />
       </div>
@@ -33,7 +37,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="tasaInteres"
           value={formData.tasaInteres || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         />
       </div>
@@ -44,7 +49,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="cuotas"
           value={formData.cuotas || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         />
       </div>
@@ -54,7 +60,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="modalidadCredito"
           value={formData.modalidadCredito || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         >
           <option value="">Seleccione...</option>
@@ -72,7 +79,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="destinoCredito"
           value={formData.destinoCredito || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         />
       </div>
@@ -82,7 +90,8 @@ const CreditoForm = ({ formData, handleInputChange }) => {
           name="periodoCredito"
           value={formData.periodoCredito || ''}
           onChange={handleInputChange}
-          className="w-full p-2 border border-yellow-500 rounded"
+          disabled={!isEditable}
+          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
           required
         >
           <option value="">Seleccione...</option>
