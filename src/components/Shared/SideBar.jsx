@@ -67,10 +67,6 @@ const Sidebar = () => {
     ],
     asesor: [
       {
-        section: 'Dashboard',
-        link: '/asesor/dashboard',
-      },
-      {
         section:'Evaluaciones',
         subs:[
           {name:'Evaluar Cliente' , link:'/asesor/evaluacion-cliente'},
