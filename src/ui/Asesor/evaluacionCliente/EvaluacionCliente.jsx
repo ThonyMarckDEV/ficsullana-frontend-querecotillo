@@ -30,7 +30,7 @@ const initialState = {
         monto_ultima_compra: 0,
         detalleInventario: []
     },
-    garantias: [] // Array para múltiples garantías
+    garantias: [] 
 };
 
 const NuevaEvaluacion = () => {
@@ -107,7 +107,6 @@ const NuevaEvaluacion = () => {
     };
     
     const handleInputChange = (e, formType) => {
-        // Lógica especial para cuando se actualiza el array de garantías directamente
         if (formType === null && e.target.name === 'garantias') {
              setFormData(prev => ({ ...prev, garantias: e.target.value }));
              return;
@@ -122,7 +121,7 @@ const NuevaEvaluacion = () => {
         }
     };
 
-    // --- NUEVA LÓGICA DE VALIDACIÓN ---
+    // --- VALIDACIÓN ACTUALIZADA ---
     const validateForm = () => {
         // 1. Validar Cliente
         if (!formData.usuario.dni || !formData.usuario.nombre || !formData.usuario.apellidoPaterno) {
@@ -150,14 +149,19 @@ const NuevaEvaluacion = () => {
             return false;
         }
 
-        // 4. Validar Garantías (Iterar sobre el array)
-        if (formData.garantias.length > 0) {
-            for (let i = 0; i < formData.garantias.length; i++) {
-                const g = formData.garantias[i];
-                if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
-                    showToast(`Faltan datos en la Garantía #${i + 1} (Clase, Descripción o Valor Comercial).`, 'error');
-                    return false;
-                }
+        // 4. Validar Garantías (OBLIGATORIO AL MENOS 1)
+        if (formData.garantias.length === 0) {
+            showToast('Debe agregar al menos una Garantía o Declaración Jurada (Sección 4).', 'error');
+            return false;
+        }
+
+        // Validar campos internos de cada garantía
+        for (let i = 0; i < formData.garantias.length; i++) {
+            const g = formData.garantias[i];
+            // Validamos campos mínimos requeridos
+            if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
+                showToast(`Faltan datos en la Garantía #${i + 1} (Clase, Descripción o Valor Comercial).`, 'error');
+                return false;
             }
         }
 
@@ -185,19 +189,21 @@ const NuevaEvaluacion = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Ejecutar validación antes de enviar
         if (!validateForm()) {
-            return; // Detener si hay errores
+            return;
         }
 
         setIsLoading(true);
         try {
-            // Preparar payload final
             const dataToSend = {
                 ...formData,
-                aval: hasAval ? formData.aval : null // Enviar null o vacío si no hay aval
+                aval: hasAval ? formData.aval : null
             };
 
+            if (!hasAval) {
+                delete dataToSend.aval;
+            }
+            
             console.log(">>> PAYLOAD:", JSON.stringify(dataToSend, null, 2));
             
             await createEvaluacion(dataToSend);
@@ -249,7 +255,6 @@ const NuevaEvaluacion = () => {
                         <CollapsibleSection title="4. Garantías (Declaración Jurada / Reales)">
                             <GarantiasForm 
                                 formData={formData.garantias} 
-                                // Aquí pasamos null como formType para indicar que manejamos la lógica especial dentro de handleInputChange
                                 handleInputChange={(e) => handleInputChange(e, null)} 
                                 isDisabled={isClientLocked} 
                             />
@@ -269,7 +274,7 @@ const NuevaEvaluacion = () => {
                             </label>
                         </div>
 
-                        {/* 5. AVAL (Condicional) */}
+                        {/* 5. AVAL */}
                         {hasAval && (
                             <div className="animate-fadeIn">
                                 <CollapsibleSection title="5. Datos del Aval">
@@ -295,16 +300,9 @@ const NuevaEvaluacion = () => {
                     </form>
                 </div>
             </div>
-            
-            {/* Estilos simples para animaciones */}
             <style>{`
-                .animate-fadeIn {
-                    animation: fadeIn 0.3s ease-in-out;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(-10px); }
-                    to { opacity: 1; transform: translateY(0); }
-                }
+                .animate-fadeIn { animation: fadeIn 0.3s ease-in-out; }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
             `}</style>
         </>
     );

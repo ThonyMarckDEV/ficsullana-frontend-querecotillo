@@ -92,7 +92,7 @@ export const getEvaluaciones = async (dni) => {
         throw new Error('Por favor, ingrese un DNI válido de 8 o 9 dígitos.');
     }
 
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones?dni=${dni}`, { // Ajustado query param
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/index?dni=${dni}`, { // Ajustado query param
         method: 'GET',
         headers: {
             'Accept': 'application/json',
