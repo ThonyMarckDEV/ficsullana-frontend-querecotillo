@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { correctEvaluacion } from 'services/evaluacionClienteService';
+import { correctEvaluacion, getEvaluacionDetail } from 'services/evaluacionClienteService'; // <--- Importamos getEvaluacionDetail
 import { toast } from 'react-toastify';
+import EvaluacionDetailModal from './modals/EvaluacionDetailModal'; // <--- Importamos el Modal
 
 const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onReject, isLoading, isPending }) => {
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({});
-    // --- NUEVO ESTADO ---
-    // Estado de carga solo para el botón de guardar
     const [isSaving, setIsSaving] = useState(false);
+
+    // Estados para el Modal de detalle
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [detailData, setDetailData] = useState(null);
+    const [isLoadingDetail, setIsLoadingDetail] = useState(false);
 
     useEffect(() => {
         if (evaluacion) {
@@ -23,6 +27,7 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
         }
     }, [evaluacion]);
 
+    // ... (handleInputChange y handleSaveChanges se mantienen igual) ...
     const handleInputChange = (e) => {
         const { name, value, type } = e.target;
         setFormData(prev => ({ 
@@ -31,12 +36,8 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
         }));
     };
 
-    const handleEditClick = () => setIsEditing(true);
-    const handleCancelClick = () => setIsEditing(false);
-
-    // --- FUNCIÓN MODIFICADA ---
     const handleSaveChanges = async () => {
-        setIsSaving(true); // <--- Activamos el loader
+        setIsSaving(true);
         try {
             await correctEvaluacion(evaluacion.id, formData);
             toast.success('¡Evaluación corregida con éxito!');
@@ -45,12 +46,27 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
         } catch (error) {
             toast.error(`Error al guardar: ${error.message || 'Revise los datos'}`);
         } finally {
-            setIsSaving(false); // <--- Desactivamos el loader (en éxito o error)
+            setIsSaving(false);
+        }
+    };
+
+    // --- LÓGICA PARA VER DETALLE ---
+    const handleViewDetails = async () => {
+        setIsLoadingDetail(true);
+        try {
+            // Llamamos al endpoint show
+            const fullData = await getEvaluacionDetail(evaluacion.id);
+            setDetailData(fullData);
+            setIsModalOpen(true);
+        } catch (error) {
+            toast.error("Error al cargar los detalles completos.");
+            console.error(error);
+        } finally {
+            setIsLoadingDetail(false);
         }
     };
 
     const renderField = (label, name, value, type = 'text', options) => (
-        // ... (esta función no cambia)
         <div className="grid grid-cols-3 gap-4 items-center mb-2">
             <label className="font-semibold text-gray-600 col-span-1">{label}:</label>
             <div className="col-span-2">
@@ -78,7 +94,18 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
 
     return (
         <div className={`bg-white p-6 rounded-lg shadow-md mb-4 border-l-4 ${borderColorClass}`}>
-            <h3 className="text-lg font-bold mb-4">{isEditing ? 'Editando Evaluación...' : evaluacion.producto}</h3>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold">{isEditing ? 'Editando Evaluación...' : evaluacion.producto}</h3>
+                
+                {/* BOTÓN VER DETALLE */}
+                <button 
+                    onClick={handleViewDetails}
+                    disabled={isLoadingDetail}
+                    className="text-sm text-blue-600 hover:text-blue-800 underline font-semibold flex items-center gap-1"
+                >
+                    {isLoadingDetail ? 'Cargando...' : 'Ver Detalle Completo 👁️'}
+                </button>
+            </div>
 
             {renderField('Monto Préstamo', 'montoPrestamo', `S/ ${evaluacion.montoPrestamo}`, 'number', { min: 0, step: 0.01 })}
             {renderField('Tasa Interés', 'tasaInteres', `${evaluacion.tasaInteres}%`, 'number', { min: 0 })}
@@ -95,7 +122,6 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
                 <div className="mt-6 pt-4 border-t flex justify-between items-center">
                     {isEditing ? (
                         <div className="flex gap-2">
-                            {/* --- BOTÓN MODIFICADO --- */}
                             <button 
                                 onClick={handleSaveChanges} 
                                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:bg-blue-400 disabled:cursor-wait" 
@@ -104,7 +130,7 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
                                 {isSaving ? 'Guardando...' : 'Guardar Cambios'}
                             </button>
                             <button 
-                                onClick={handleCancelClick} 
+                                onClick={() => setIsEditing(false)} 
                                 className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600 disabled:bg-gray-400" 
                                 disabled={isSaving || isLoading}
                             >
@@ -112,13 +138,12 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
                             </button>
                         </div>
                     ) : (
-                        <button onClick={handleEditClick} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled={isLoading}>
+                        <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-yellow-500 text-white rounded hover:bg-yellow-600" disabled={isLoading}>
                             Editar
                         </button>
                     )}
 
                     <div className="flex gap-2">
-                        {/* --- BOTONES BLOQUEADOS EN MODO EDICIÓN --- */}
                         <button 
                             onClick={() => onApprove(evaluacion.id)} 
                             className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed" 
@@ -136,6 +161,13 @@ const EvaluacionDetailComponent = ({ evaluacion, onUpdateSuccess, onApprove, onR
                     </div>
                 </div>
             )}
+
+            {/* Renderizado del Modal */}
+            <EvaluacionDetailModal 
+                isOpen={isModalOpen} 
+                onClose={() => setIsModalOpen(false)} 
+                data={detailData} 
+            />
         </div>
     );
 };

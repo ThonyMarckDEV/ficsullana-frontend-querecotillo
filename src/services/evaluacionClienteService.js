@@ -74,6 +74,17 @@ export const updateEvaluacion = async (evaluacionId, data) => {
     return handleResponse(response);
 };
 
+export const getEvaluacionDetail = async (evaluacionId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/show/${evaluacionId}`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+
+    return handleResponse(response);
+};
+
 export const updateStatusEvaluacion = async (evaluacionId, data) => {
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/status/${evaluacionId}`, {
         method: 'PUT',
