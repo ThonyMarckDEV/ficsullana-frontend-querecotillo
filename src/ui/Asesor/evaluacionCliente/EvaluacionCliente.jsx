@@ -3,49 +3,98 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import createEvaluacion from 'services/evaluacionClienteService';
 
+// Importación de Formularios
 import UsuarioForm from './components/formularios/UsuarioForm'; 
 import CreditoForm from './components/formularios/CreditoForm';
 import AvalForm from './components/formularios/AvalForm';
-import LoadingScreen from 'components/Shared/LoadingScreen';
+import UnidadFamiliarForm from './components/formularios/UnidadFamiliarForm';
+import DatosNegocioForm from './components/formularios/DatosNegocioForm';
+import GarantiasForm from './components/formularios/GarantiasForm';
 
+// Componentes Compartidos
+import LoadingScreen from 'components/Shared/LoadingScreen';
 import CollapsibleSection from './components/CollapsibleSection'; 
 import BuscarClientePorDni from 'components/Shared/Comboboxes/BuscarClientePorDni';
-
 import { useToast } from 'components/Shared/Errors/ToastNotification';
 
 const initialState = {
     usuario: {},
     credito: {},
-    aval: {}
+    aval: {},
+    unidadFamiliar: {
+        numero_miembros: 0,
+        tiene_deudas_ifis: 0,
+    },
+    datosNegocio: {
+        otros_ingresos_monto: 0,
+        ventas_diarias: 0,
+        monto_ultima_compra: 0,
+        detalleInventario: []
+    },
+    // NUEVO ESTADO PARA GARANTÍAS (Array de objetos)
+    garantias: [] 
 };
 
 const NuevaEvaluacion = () => {
     const navigate = useNavigate();
+    const { showToast } = useToast();
+
     const [formData, setFormData] = useState(initialState);
     const [isClientLocked, setIsClientLocked] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
-    // 1. Nuevo estado para controlar si hay aval o no
     const [hasAval, setHasAval] = useState(false);
-
-    const { showToast } = useToast();
 
     const handleClientFound = (data) => {
         const datos = data.datosCliente;
         
         const flattenedUsuario = {
-            id: datos.id, nombre: datos.nombre, apellidoPaterno: datos.apellidoPaterno, apellidoMaterno: datos.apellidoMaterno, estadoCivil: datos.estadoCivil, sexo: datos.sexo, dni: datos.dni, fechaCaducidadDni: datos.fechaCaducidadDni, fechaNacimiento: datos.fechaNacimiento, nacionalidad: datos.nacionalidad, residePeru: datos.residePeru ? 1:0, nivelEducativo: datos.nivelEducativo, profesion: datos.profesion, enfermedadesPreexistentes: datos.enfermedadesPreexistentes ? 1:0, expuestaPoliticamente: datos.expuesta ? 1:0, 
-            telefonoMovil: data.datosCliente.contactos[0]?.telefonoMovil, telefonoFijo: data.datosCliente.contactos[0]?.telefonoFijo, correo: data.datosCliente.contactos[0]?.correo, 
-            direccionFiscal: data.datosCliente.direcciones[0]?.direccionFiscal, direccionCorrespondencia: data.datosCliente.direcciones[0]?.direccionCorrespondencia, departamento: data.datosCliente.direcciones[0]?.departamento, provincia: data.datosCliente.direcciones[0]?.provincia, distrito: data.datosCliente.direcciones[0]?.distrito, tipoVivienda: data.datosCliente.direcciones[0]?.tipoVivienda, tiempoResidencia: data.datosCliente.direcciones[0]?.tiempoResidencia, referenciaDomicilio: data.datosCliente.direcciones[0]?.referenciaDomicilio, 
-            centroLaboral: data.datosCliente.empleos[0]?.centroLaboral, ingresoMensual: data.datosCliente.empleos[0]?.ingresoMensual, inicioLaboral: data.datosCliente.empleos[0]?.inicioLaboral, situacionLaboral: data.datosCliente.empleos[0]?.situacionLaboral, 
-            ctaAhorros: data.datosCliente.cuentas_bancarias[0]?.ctaAhorros, cci: data.datosCliente.cuentas_bancarias[0]?.cci, entidadFinanciera: data.datosCliente.cuentas_bancarias[0]?.entidadFinanciera
+            id: datos.id, 
+            nombre: datos.nombre, 
+            apellidoPaterno: datos.apellidoPaterno, 
+            apellidoMaterno: datos.apellidoMaterno, 
+            estadoCivil: datos.estadoCivil, 
+            sexo: datos.sexo, 
+            dni: datos.dni, 
+            fechaCaducidadDni: datos.fechaCaducidadDni, 
+            fechaNacimiento: datos.fechaNacimiento, 
+            nacionalidad: datos.nacionalidad, 
+            residePeru: datos.residePeru ? 1 : 0, 
+            nivelEducativo: datos.nivelEducativo, 
+            profesion: datos.profesion, 
+            enfermedadesPreexistentes: datos.enfermedadesPreexistentes ? 1 : 0, 
+            expuestaPoliticamente: datos.expuesta ? 1 : 0, 
+            telefonoMovil: data.datosCliente.contactos[0]?.telefonoMovil, 
+            telefonoFijo: data.datosCliente.contactos[0]?.telefonoFijo, 
+            correo: data.datosCliente.contactos[0]?.correo, 
+            direccionFiscal: data.datosCliente.direcciones[0]?.direccionFiscal, 
+            direccionCorrespondencia: data.datosCliente.direcciones[0]?.direccionCorrespondencia, 
+            departamento: data.datosCliente.direcciones[0]?.departamento, 
+            provincia: data.datosCliente.direcciones[0]?.provincia, 
+            distrito: data.datosCliente.direcciones[0]?.distrito, 
+            tipoVivienda: data.datosCliente.direcciones[0]?.tipoVivienda, 
+            tiempoResidencia: data.datosCliente.direcciones[0]?.tiempoResidencia, 
+            referenciaDomicilio: data.datosCliente.direcciones[0]?.referenciaDomicilio, 
+            centroLaboral: data.datosCliente.empleos[0]?.centroLaboral, 
+            ingresoMensual: data.datosCliente.empleos[0]?.ingresoMensual, 
+            inicioLaboral: data.datosCliente.empleos[0]?.inicioLaboral, 
+            situacionLaboral: data.datosCliente.empleos[0]?.situacionLaboral, 
+            ctaAhorros: data.datosCliente.cuentas_bancarias[0]?.ctaAhorros, 
+            cci: data.datosCliente.cuentas_bancarias[0]?.cci, 
+            entidadFinanciera: data.datosCliente.cuentas_bancarias[0]?.entidadFinanciera
         };
 
         const avalData = data.aval || {};
-        setFormData({ ...initialState, usuario: flattenedUsuario, aval: avalData });
+        
+        setFormData(prev => ({ 
+            ...prev, 
+            usuario: flattenedUsuario, 
+            aval: avalData,
+            // Si la respuesta incluyera garantías previas, las cargaríamos aquí
+            // garantias: data.garantias || []
+        }));
+        
         setIsClientLocked(true);
 
-        // 2. Detectar automáticamente si viene aval de la BD para activar el checkbox
         if (avalData && Object.keys(avalData).length > 0 && avalData.dniAval) {
             setHasAval(true);
         } else {
@@ -56,32 +105,46 @@ const NuevaEvaluacion = () => {
     const handleClear = () => {
         setFormData(initialState);
         setIsClientLocked(false);
-        setHasAval(false); // Reseteamos el checkbox
+        setHasAval(false);
     };
     
     const handleInputChange = (e, formType) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: value } }));
+        // Caso especial para 'garantias' que es un array directo en el root de formData (si así lo decidimos)
+        // Ojo: En el state 'garantias' está en el primer nivel, así que formType no aplica igual si se pasa directo.
+        // Pero como en GarantiasForm llamamos con name='garantias', manejémoslo:
+        
+        if (name === 'garantias') {
+            // Actualización directa del array de garantías
+            setFormData(prev => ({ ...prev, garantias: value }));
+        } else {
+            // Actualización de objetos anidados (usuario, credito, etc)
+            setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: value } }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
         setIsLoading(true);
         try {
-            // Preparamos la data. Si el usuario desmarcó "Incluir Aval", enviamos el objeto aval vacío
-            // para asegurar que no se guarde basura oculta.
+            // Preparar payload
             const dataToSend = {
                 ...formData,
                 aval: hasAval ? formData.aval : {} 
             };
 
+            // ---------------------------------------------------------
+            // IMPRESIÓN EN CONSOLA ANTES DE ENVIAR (Solicitado)
+            // ---------------------------------------------------------
+            console.log(">>> JSON A ENVIAR AL BACKEND:", JSON.stringify(dataToSend, null, 2));
+            
             await createEvaluacion(dataToSend);
             
             showToast({ msg: 'Nueva evaluación creada con **éxito**!' }, 'success');
             navigate('/asesor/evaluaciones-enviadas');
             
         } catch (error) {
+            console.error("Error al enviar:", error);
             showToast(error, 'error'); 
         } finally {
             setIsLoading(false);
@@ -97,9 +160,40 @@ const NuevaEvaluacion = () => {
                     
                     <BuscarClientePorDni onClientFound={handleClientFound} onClear={handleClear} />
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit} className="space-y-6 mt-6">
 
-                        {/* CHECKBOX ACTIVADOR DEL AVAL */}
+                        {/* 1. CLIENTE */}
+                        <CollapsibleSection title="1. Datos del Cliente">
+                            <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} isDisabled={isClientLocked} />
+                        </CollapsibleSection>
+
+                        {/* 2. UNIDAD FAMILIAR */}
+                        <CollapsibleSection title="2. Análisis de la Unidad Familiar">
+                            <UnidadFamiliarForm 
+                                formData={formData.unidadFamiliar} 
+                                handleInputChange={(e) => handleInputChange(e, 'unidadFamiliar')} 
+                            />
+                        </CollapsibleSection>
+
+                        {/* 3. DATOS DEL NEGOCIO */}
+                        <CollapsibleSection title="3. Datos del Negocio y Balance">
+                            <DatosNegocioForm 
+                                formData={formData.datosNegocio} 
+                                handleInputChange={(e) => handleInputChange(e, 'datosNegocio')} 
+                            />
+                        </CollapsibleSection>
+                        
+                        {/* 4. GARANTÍAS (NUEVA SECCIÓN) */}
+                        <CollapsibleSection title="4. Garantías (Declaración Jurada / Reales)">
+                            <GarantiasForm 
+                                formData={formData.garantias} 
+                                // Nota: Pasamos null como formType o manejamos la lógica en handleInputChange
+                                handleInputChange={(e) => handleInputChange(e, null)} 
+                                isDisabled={isClientLocked} 
+                            />
+                        </CollapsibleSection>
+
+                        {/* CHECKBOX AVAL */}
                         <div className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
                             <input 
                                 id="checkAval"
@@ -112,15 +206,10 @@ const NuevaEvaluacion = () => {
                                 ¿Esta evaluación incluye un <strong>Aval</strong>?
                             </label>
                         </div>
-                        
-                        {/* SECCION 1: CLIENTE */}
-                        <CollapsibleSection title="- Datos del Cliente">
-                            <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} isDisabled={isClientLocked} />
-                        </CollapsibleSection>
 
-                        {/* SECCION 2: AVAL (CONDICIONAL) */}
+                        {/* 5. AVAL (Condicional) */}
                         {hasAval && (
-                            <CollapsibleSection title="- Datos del Aval">
+                            <CollapsibleSection title="5. Datos del Aval">
                                 <AvalForm 
                                     formData={formData.aval} 
                                     handleInputChange={(e) => handleInputChange(e, 'aval')} 
@@ -129,8 +218,8 @@ const NuevaEvaluacion = () => {
                             </CollapsibleSection>
                         )}
                         
-                        {/* SECCION 3: CREDITO */}
-                        <CollapsibleSection title="- Datos del Crédito">
+                        {/* 6. CREDITO */}
+                        <CollapsibleSection title="6. Datos del Crédito">
                             <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />
                         </CollapsibleSection>
 
