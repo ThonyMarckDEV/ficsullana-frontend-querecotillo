@@ -2,7 +2,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import createEvaluacion from 'services/evaluacionClienteService';
-import { toast } from 'react-toastify';
 
 import UsuarioForm from './components/formularios/UsuarioForm'; 
 import CreditoForm from './components/formularios/CreditoForm';
@@ -10,7 +9,6 @@ import AvalForm from './components/formularios/AvalForm';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 
 import CollapsibleSection from './components/CollapsibleSection'; 
-import ViewPdfModal from 'components/Shared/Modals/ViewPdfModal';  
 import BuscarClientePorDni from 'components/Shared/Comboboxes/BuscarClientePorDni';
 
 import { useToast } from 'components/Shared/Errors/ToastNotification';
@@ -21,22 +19,20 @@ const initialState = {
     aval: {}
 };
 
-
 const NuevaEvaluacion = () => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState(initialState);
     const [isClientLocked, setIsClientLocked] = useState(false);
-    const [pdfFile, setPdfFile] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
+    
+    // 1. Nuevo estado para controlar si hay aval o no
+    const [hasAval, setHasAval] = useState(false);
 
     const { showToast } = useToast();
-    
-    // --- NUEVOS ESTADOS PARA EL MODAL ---
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [pdfPreviewUrl, setPdfPreviewUrl] = useState(null);
 
     const handleClientFound = (data) => {
         const datos = data.datosCliente;
+        
         const flattenedUsuario = {
             id: datos.id, nombre: datos.nombre, apellidoPaterno: datos.apellidoPaterno, apellidoMaterno: datos.apellidoMaterno, estadoCivil: datos.estadoCivil, sexo: datos.sexo, dni: datos.dni, fechaCaducidadDni: datos.fechaCaducidadDni, fechaNacimiento: datos.fechaNacimiento, nacionalidad: datos.nacionalidad, residePeru: datos.residePeru ? 1:0, nivelEducativo: datos.nivelEducativo, profesion: datos.profesion, enfermedadesPreexistentes: datos.enfermedadesPreexistentes ? 1:0, expuestaPoliticamente: datos.expuesta ? 1:0, 
             telefonoMovil: data.datosCliente.contactos[0]?.telefonoMovil, telefonoFijo: data.datosCliente.contactos[0]?.telefonoFijo, correo: data.datosCliente.contactos[0]?.correo, 
@@ -44,19 +40,23 @@ const NuevaEvaluacion = () => {
             centroLaboral: data.datosCliente.empleos[0]?.centroLaboral, ingresoMensual: data.datosCliente.empleos[0]?.ingresoMensual, inicioLaboral: data.datosCliente.empleos[0]?.inicioLaboral, situacionLaboral: data.datosCliente.empleos[0]?.situacionLaboral, 
             ctaAhorros: data.datosCliente.cuentas_bancarias[0]?.ctaAhorros, cci: data.datosCliente.cuentas_bancarias[0]?.cci, entidadFinanciera: data.datosCliente.cuentas_bancarias[0]?.entidadFinanciera
         };
-        setFormData({ ...initialState, usuario: flattenedUsuario, aval: data.aval || {} });
-        setIsClientLocked(true);
-    };
 
+        const avalData = data.aval || {};
+        setFormData({ ...initialState, usuario: flattenedUsuario, aval: avalData });
+        setIsClientLocked(true);
+
+        // 2. Detectar automáticamente si viene aval de la BD para activar el checkbox
+        if (avalData && Object.keys(avalData).length > 0 && avalData.dniAval) {
+            setHasAval(true);
+        } else {
+            setHasAval(false);
+        }
+    };
 
     const handleClear = () => {
         setFormData(initialState);
         setIsClientLocked(false);
-        setPdfFile(null);
-        if(pdfPreviewUrl) {
-            URL.revokeObjectURL(pdfPreviewUrl); // Libera memoria
-            setPdfPreviewUrl(null);
-        }
+        setHasAval(false); // Reseteamos el checkbox
     };
     
     const handleInputChange = (e, formType) => {
@@ -64,38 +64,24 @@ const NuevaEvaluacion = () => {
         setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: value } }));
     };
 
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === 'application/pdf') {
-            setPdfFile(file);
-            // Libera la URL anterior si existe para evitar fugas de memoria
-            if (pdfPreviewUrl) {
-                URL.revokeObjectURL(pdfPreviewUrl);
-            }
-            setPdfPreviewUrl(URL.createObjectURL(file));
-        } else {
-            toast.error('Por favor, suba un archivo PDF válido.');
-            setPdfFile(null);
-            setPdfPreviewUrl(null);
-        }
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!pdfFile) {
-            toast.error('Por favor, adjunte el archivo PDF de la evaluación.');
-            return;
-        }
+        
         setIsLoading(true);
-       try {
-            await createEvaluacion(formData, pdfFile);
+        try {
+            // Preparamos la data. Si el usuario desmarcó "Incluir Aval", enviamos el objeto aval vacío
+            // para asegurar que no se guarde basura oculta.
+            const dataToSend = {
+                ...formData,
+                aval: hasAval ? formData.aval : {} 
+            };
+
+            await createEvaluacion(dataToSend);
             
-            // Éxito: Usamos showToast
             showToast({ msg: 'Nueva evaluación creada con **éxito**!' }, 'success');
             navigate('/asesor/evaluaciones-enviadas');
             
         } catch (error) {
-            // Fallo: 'error' contiene el objeto JSON del backend que queremos mostrar
             showToast(error, 'error'); 
         } finally {
             setIsLoading(false);
@@ -109,39 +95,43 @@ const NuevaEvaluacion = () => {
                 <div className="max-w-6xl mx-auto">
                     <h1 className="text-4xl font-bold text-gray-800 mb-8 border-b pb-4">Registrar Nueva Evaluación</h1>
                     
-                   {/* AQUI USAMOS EL NUEVO COMPONENTE REUTILIZABLE */}
                     <BuscarClientePorDni onClientFound={handleClientFound} onClear={handleClear} />
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+
+                        {/* CHECKBOX ACTIVADOR DEL AVAL */}
+                        <div className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                            <input 
+                                id="checkAval"
+                                type="checkbox" 
+                                checked={hasAval}
+                                onChange={(e) => setHasAval(e.target.checked)}
+                                className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                            />
+                            <label htmlFor="checkAval" className="ml-3 text-lg font-medium text-gray-900 cursor-pointer select-none">
+                                ¿Esta evaluación incluye un <strong>Aval</strong>?
+                            </label>
+                        </div>
+                        
+                        {/* SECCION 1: CLIENTE */}
                         <CollapsibleSection title="1. Datos del Cliente">
                             <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} isDisabled={isClientLocked} />
                         </CollapsibleSection>
 
-                        <CollapsibleSection title="2. Datos del Aval (Opcional)">
-                          <AvalForm formData={formData.aval} handleInputChange={(e) => handleInputChange(e, 'aval')} isDisabled={isClientLocked} />
-                        </CollapsibleSection>
+                        {/* SECCION 2: AVAL (CONDICIONAL) */}
+                        {hasAval && (
+                            <CollapsibleSection title="2. Datos del Aval">
+                                <AvalForm 
+                                    formData={formData.aval} 
+                                    handleInputChange={(e) => handleInputChange(e, 'aval')} 
+                                    isDisabled={isClientLocked} 
+                                />
+                            </CollapsibleSection>
+                        )}
                         
+                        {/* SECCION 3: CREDITO */}
                         <CollapsibleSection title="3. Datos del Crédito">
                             <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />
-                        </CollapsibleSection>
-
-                        <CollapsibleSection title="4. Adjuntar Documento">
-                            <input
-                                type="file"
-                                accept="application/pdf"
-                                onChange={handleFileChange}
-                                className="w-full p-2 border border-yellow-500 rounded file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
-                                required
-                            />
-                            {pdfFile && (
-                                <button
-                                  type="button"
-                                  onClick={() => setIsModalOpen(true)}
-                                  className="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                                >
-                                  Ver PDF Adjuntado
-                                </button>
-                            )}
                         </CollapsibleSection>
 
                         <div className="text-center pt-4">
@@ -152,12 +142,6 @@ const NuevaEvaluacion = () => {
                     </form>
                 </div>
             </div>
-            
-            <ViewPdfModal 
-                isOpen={isModalOpen} 
-                onClose={() => setIsModalOpen(false)} 
-                pdfUrl={pdfPreviewUrl} 
-            />
         </>
     );
 };
