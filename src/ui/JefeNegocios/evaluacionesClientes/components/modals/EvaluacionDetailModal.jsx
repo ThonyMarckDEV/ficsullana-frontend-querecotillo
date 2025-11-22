@@ -8,7 +8,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
     // React los buscaba como "usuario", "datosNegocio" (camelCase).
     // Ajustamos para leer la clave correcta del JSON.
 
-    const usuario = data.cliente || data.usuario || {}; 
+    // const usuario = data.cliente || data.usuario || {}; 
     const negocio = data.datos_negocio || data.datosNegocio || {};
     const inventario = negocio.detalle_inventario || negocio.detalleInventario || [];
     const familia = data.unidad_familiar || data.unidadFamiliar || {};
@@ -27,8 +27,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                     <div>
                         <h2 className="text-2xl font-bold text-gray-800">Detalle de Evaluación #{data.id}</h2>
                         <p className="text-sm text-gray-500">
-                            Producto: <span className="font-semibold text-gray-700">{data.producto}</span> | 
-                            Cliente: <span className="font-semibold text-gray-700">{usuario.nombre || ''} {usuario.apellidoPaterno || ''} {usuario.apellidoMaterno || ''}</span>
+                            Producto: <span className="font-semibold text-gray-700">{data.producto}</span> 
+                            {/* Cliente: <span className="font-semibold text-gray-700">{usuario.nombre || ''} {usuario.apellidoPaterno || ''} {usuario.apellidoMaterno || ''}</span> */}
                         </p>
                     </div>
                     <button onClick={onClose} className="text-gray-400 hover:text-red-600 font-bold text-3xl transition-colors">&times;</button>

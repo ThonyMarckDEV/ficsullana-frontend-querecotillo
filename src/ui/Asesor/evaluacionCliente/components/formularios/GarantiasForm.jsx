@@ -87,7 +87,7 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                         <label className="flex items-center cursor-pointer">
                                             <input 
                                                 type="checkbox" 
-                                                checked={item.es_declaracion_jurada == 1} 
+                                                checked={item.es_declaracion_jurada === 1} 
                                                 onChange={() => handleTypeChange(index, true)}
                                                 disabled={isDisabled}
                                                 className="form-checkbox text-blue-600 h-4 w-4"
@@ -97,7 +97,7 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                         <label className="flex items-center cursor-pointer">
                                             <input 
                                                 type="checkbox" 
-                                                checked={item.es_declaracion_jurada == 0} 
+                                                checked={item.es_declaracion_jurada === 0} 
                                                 onChange={() => handleTypeChange(index, false)}
                                                 disabled={isDisabled}
                                                 className="form-checkbox text-blue-600 h-4 w-4"
