@@ -121,26 +121,31 @@ const NuevaEvaluacion = () => {
         }
     };
 
-    // --- VALIDACIÓN ACTUALIZADA ---
     const validateForm = () => {
-        // 1. Validar Cliente
+        console.log("---- VALIDANDO FORMULARIO ----");
+
+        // 1. Validar Datos Texto Cliente
         if (!formData.usuario.dni || !formData.usuario.nombre || !formData.usuario.apellidoPaterno) {
-            showToast('Faltan datos básicos del Cliente (Sección 1). Busque un cliente por DNI.', 'error');
+            showToast('Faltan datos básicos del Cliente (Sección 1).', 'error');
             return false;
         }
+
+        // 1.1. VALIDAR FIRMA CLIENTE (OBLIGATORIO)
+        // Verificamos si es null, undefined o string vacío
         if (!formData.usuario.firmaCliente) {
-            showToast('Debe adjuntar la Firma del Cliente (Sección 1).', 'error');
+            console.error("FALLO: No se ha cargado la firma del cliente.");
+            showToast('⚠️ FALTA: Debe subir la imagen de la Firma del Cliente (Sección 1).', 'error');
             return false;
         }
 
         // 2. Validar Unidad Familiar
-        if (!formData.unidadFamiliar.gastos_alimentacion || !formData.unidadFamiliar.gastos_servicios) {
-            showToast('Complete los Gastos Familiares obligatorios (Sección 2).', 'error');
+        if (Number(formData.unidadFamiliar.gastos_alimentacion) <= 0 || Number(formData.unidadFamiliar.gastos_servicios) <= 0) {
+            showToast('Complete los Gastos Familiares (Sección 2). No pueden ser 0.', 'error');
             return false;
         }
 
         // 3. Validar Negocio
-        if (!formData.datosNegocio.ventas_diarias || formData.datosNegocio.ventas_diarias <= 0) {
+        if (!formData.datosNegocio.ventas_diarias || Number(formData.datosNegocio.ventas_diarias) <= 0) {
              showToast('Las Ventas Diarias deben ser mayor a 0 (Sección 3).', 'error');
              return false;
         }
@@ -149,30 +154,33 @@ const NuevaEvaluacion = () => {
             return false;
         }
 
-        // 4. Validar Garantías (OBLIGATORIO AL MENOS 1)
-        if (formData.garantias.length === 0) {
-            showToast('Debe agregar al menos una Garantía o Declaración Jurada (Sección 4).', 'error');
+        // 4. Validar Garantías
+        if (!formData.garantias || formData.garantias.length === 0) {
+            showToast('Debe agregar al menos una fila en la tabla de Garantías (botón azul +).', 'error');
             return false;
         }
 
-        // Validar campos internos de cada garantía
+        // Validar filas de garantías
         for (let i = 0; i < formData.garantias.length; i++) {
             const g = formData.garantias[i];
-            // Validamos campos mínimos requeridos
             if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
-                showToast(`Faltan datos en la Garantía #${i + 1} (Clase, Descripción o Valor Comercial).`, 'error');
+                showToast(`Faltan datos en la Garantía #${i + 1} (Clase, Descripción o Valor).`, 'error');
                 return false;
             }
         }
 
-        // 5. Validar Aval (SOLO si el check está activo)
+        // 5. Validar Aval (SOLO SI EL CHECK ESTÁ ACTIVADO)
         if (hasAval) {
+            // 5.1 Validar Datos Texto Aval
             if (!formData.aval.dniAval || !formData.aval.nombresAval) {
-                showToast('Ha marcado que TIENE AVAL, por favor complete sus datos (Sección 5).', 'error');
+                showToast('Ha marcado que TIENE AVAL, complete DNI y Nombre (Sección 5).', 'error');
                 return false;
             }
+
+            // 5.2 VALIDAR FIRMA AVAL (OBLIGATORIO SI HAY AVAL)
             if (!formData.aval.firmaAval) {
-                showToast('Debe adjuntar la Firma del Aval (Sección 5).', 'error');
+                console.error("FALLO: No se ha cargado la firma del aval.");
+                showToast('⚠️ FALTA: Debe subir la imagen de la Firma del Aval (Sección 5).', 'error');
                 return false;
             }
         }
