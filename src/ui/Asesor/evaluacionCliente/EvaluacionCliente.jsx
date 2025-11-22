@@ -114,13 +114,13 @@ const NuevaEvaluacion = () => {
                         </div>
                         
                         {/* SECCION 1: CLIENTE */}
-                        <CollapsibleSection title="1. Datos del Cliente">
+                        <CollapsibleSection title="- Datos del Cliente">
                             <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} isDisabled={isClientLocked} />
                         </CollapsibleSection>
 
                         {/* SECCION 2: AVAL (CONDICIONAL) */}
                         {hasAval && (
-                            <CollapsibleSection title="2. Datos del Aval">
+                            <CollapsibleSection title="- Datos del Aval">
                                 <AvalForm 
                                     formData={formData.aval} 
                                     handleInputChange={(e) => handleInputChange(e, 'aval')} 
@@ -130,7 +130,7 @@ const NuevaEvaluacion = () => {
                         )}
                         
                         {/* SECCION 3: CREDITO */}
-                        <CollapsibleSection title="3. Datos del Crédito">
+                        <CollapsibleSection title="- Datos del Crédito">
                             <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />
                         </CollapsibleSection>
 
