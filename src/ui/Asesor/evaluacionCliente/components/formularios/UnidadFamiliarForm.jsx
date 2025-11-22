@@ -26,6 +26,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
                 <div>
@@ -38,6 +39,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
                 
@@ -52,6 +54,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
                 <div>
@@ -64,6 +67,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
             </div>
@@ -82,6 +86,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
                 <div>
@@ -94,6 +99,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         placeholder="Ej: 1 hijo en universidad, 1 en colegio..."
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
             </div>
@@ -111,6 +117,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleCheckboxChange}
                         className="w-5 h-5 text-red-600 bg-gray-100 border-gray-300 rounded focus:ring-red-500"
                         disabled={isDisabled}
+                        // NO REQUIRED: Es un checkbox, puede ir marcado o no.
                     />
                     <label htmlFor="tiene_deudas_ifis" className="ml-2 block text-red-700 font-bold cursor-pointer select-none">
                         ¿Cuenta con deudas en otras IFIS (Instituciones Financieras)?
@@ -118,6 +125,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                 </div>
 
                 {/* Se muestran solo si el checkbox está marcado */}
+                {/* NOTA: Estos campos son condicionales. Al renderizarse solo cuando el check está activo, el 'required' solo aplicará si son visibles. */}
                 {formData.tiene_deudas_ifis === 1 && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 animate-fadeIn">
                         {/* IFI 1 */}
@@ -131,6 +139,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                                 onChange={handleInputChange}
                                 className="w-full p-2 border border-gray-300 rounded mb-2 text-sm"
                                 disabled={isDisabled}
+                                required // <--- Si activa deudas, debe llenar al menos la IFI 1
                             />
                             <input
                                 type="number"
@@ -141,10 +150,11 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                                 onChange={handleInputChange}
                                 className="w-full p-2 border border-gray-300 rounded text-sm"
                                 disabled={isDisabled}
+                                required // <--- Si activa deudas, debe llenar al menos la IFI 1
                             />
                         </div>
 
-                        {/* IFI 2 */}
+                        {/* IFI 2 (Opcionales, el usuario podría tener solo 1 deuda) */}
                         <div className="p-2 border border-dashed border-yellow-400 rounded bg-white">
                             <p className="font-bold text-gray-600 text-sm mb-2">IFI 02</p>
                             <input
@@ -168,7 +178,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                             />
                         </div>
 
-                        {/* IFI 3 */}
+                        {/* IFI 3 (Opcional) */}
                         <div className="p-2 border border-dashed border-yellow-400 rounded bg-white">
                             <p className="font-bold text-gray-600 text-sm mb-2">IFI 03</p>
                             <input
@@ -209,6 +219,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
                 <div>
@@ -219,6 +230,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     >
                         <option value="">Seleccione...</option>
                         <option value="mensual">Mensual</option>
@@ -237,6 +249,7 @@ const UnidadFamiliarForm = ({ formData, handleInputChange, isDisabled }) => {
                         onChange={handleInputChange}
                         className="w-full p-2 border border-yellow-500 rounded"
                         disabled={isDisabled}
+                        required // <--- OBLIGATORIO
                     />
                 </div>
             </div>

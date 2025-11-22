@@ -1,8 +1,9 @@
-// src/components/CreditoForm.jsx
 import React from 'react';
 
-//                                                            <-- CAMBIA ESTA LÍNEA
 const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
+  // Clases comunes para inputs deshabilitados vs habilitados
+  const inputClasses = "w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed";
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div>
@@ -12,13 +13,12 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           name="producto"
           value={formData.producto || ''}
           onChange={handleInputChange}
-          disabled={!isEditable} // Esta lógica ahora funciona perfecto
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          disabled={!isEditable}
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         />
       </div>
-      {/* ... el resto de los inputs no cambian, ya que todos dependen de "isEditable" ... */}
-       <div>
+      <div>
         <label className="block text-red-700 font-semibold">Monto del Préstamo</label>
         <input
           type="number"
@@ -26,8 +26,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.montoPrestamo || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         />
       </div>
       <div>
@@ -38,8 +38,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.tasaInteres || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         />
       </div>
       <div>
@@ -50,8 +50,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.cuotas || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         />
       </div>
       <div>
@@ -61,8 +61,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.modalidadCredito || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         >
           <option value="">Seleccione...</option>
           <option value="nuevo">NUEVO</option>
@@ -80,8 +80,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.destinoCredito || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         />
       </div>
       <div>
@@ -91,8 +91,8 @@ const CreditoForm = ({ formData, handleInputChange, isEditable = true }) => {
           value={formData.periodoCredito || ''}
           onChange={handleInputChange}
           disabled={!isEditable}
-          className="w-full p-2 border border-yellow-500 rounded disabled:bg-gray-100 disabled:cursor-not-allowed"
-          required
+          className={inputClasses}
+          required // <--- OBLIGATORIO
         >
           <option value="">Seleccione...</option>
           <option value="mensual">Mensual</option>

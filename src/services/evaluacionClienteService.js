@@ -1,35 +1,76 @@
-// src/services/evaluacionClienteService.js (actualizado)
-
 import { fetchWithAuth } from 'js/authToken';
 import API_BASE_URL from 'js/urlHelper';
+import { handleResponse } from 'utilities/Responses/handleResponse';
 
-import { handleResponse } from 'utilities/Responses/handleResponse'; 
+/**
+ * Crea una nueva evaluación enviando datos complejos y archivos.
+ * @param {object} formDataObj - Objeto con toda la estructura del formulario (usuario, aval, datosNegocio, etc).
+ */
+const createEvaluacion = async (formDataObj) => {
+    const formData = new FormData();
 
+    // 1. EXTRACCIÓN DE ARCHIVOS
+    // Buscamos los archivos en el objeto y los adjuntamos al FormData con las claves que espera Laravel
+    
+    // Firma Cliente
+    if (formDataObj.usuario?.firmaCliente instanceof File) {
+        formData.append('firmaCliente', formDataObj.usuario.firmaCliente);
+    }
+    
+    // Firma Aval
+    if (formDataObj.aval?.firmaAval instanceof File) {
+        formData.append('firmaAval', formDataObj.aval.firmaAval);
+    }
 
-const createEvaluacion = async (dataToSend, pdfFile) => {
-    const formDataToSend = new FormData();
-    formDataToSend.append('data', JSON.stringify(dataToSend));
-    formDataToSend.append('pdf', pdfFile);
+    // Fotos del Negocio (Apuntes y Activo Fijo)
+    if (formDataObj.datosNegocio?.fotoApuntesCobranza instanceof File) {
+        formData.append('fotoApuntesCobranza', formDataObj.datosNegocio.fotoApuntesCobranza);
+    }
 
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, {
+    if (formDataObj.datosNegocio?.fotoActivoFijo instanceof File) {
+        formData.append('fotoActivoFijo', formDataObj.datosNegocio.fotoActivoFijo);
+    }
+
+    // 2. LIMPIEZA DEL JSON
+    // Clonamos el objeto para no modificar el estado original de React
+    const dataClean = JSON.parse(JSON.stringify(formDataObj));
+
+    // Eliminamos las propiedades que contenían archivos para no enviarlos como texto vacío o [object File] dentro del JSON
+    delete dataClean.usuario.firmaCliente;
+    if (dataClean.aval) delete dataClean.aval.firmaAval;
+    if (dataClean.datosNegocio) {
+        delete dataClean.datosNegocio.fotoApuntesCobranza;
+        delete dataClean.datosNegocio.fotoActivoFijo;
+    }
+
+    // 3. EMPAQUETADO DEL JSON
+    // Laravel decodificará este string en el FormRequest usando json_decode
+    formData.append('data', JSON.stringify(dataClean));
+
+    // 4. PETICIÓN AL BACKEND
+    // Nota: Al usar FormData, el navegador establece automáticamente el 'Content-Type' a 'multipart/form-data' con el boundary correcto.
+    // No debemos forzar 'Content-Type': 'application/json' aquí.
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, { // Ajustado a REST standard, o usa /create si tu ruta lo exige
         method: 'POST',
-        body: formDataToSend,
+        headers: {
+            'Accept': 'application/json', // Crucial para recibir errores en JSON y no HTML
+        },
+        body: formData,
     });
 
-    // Usamos la utilidad
     return handleResponse(response);
 };
 
 export const updateEvaluacion = async (evaluacionId, data) => {
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/update/${evaluacionId}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/update/${evaluacionId}`, { // Ajustado a REST standard
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
         body: JSON.stringify(data),
     });
     
-    // Usamos la utilidad
     return handleResponse(response);
 };
 
@@ -38,35 +79,29 @@ export const updateStatusEvaluacion = async (evaluacionId, data) => {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
         body: JSON.stringify(data),
     });
     
-    // Usamos la utilidad
     return handleResponse(response);
 };
 
 export const getEvaluaciones = async (dni) => {
     if (!dni || (dni.length < 8 || dni.length > 9)) {
-        // La validación de frontend se mantiene aquí.
         throw new Error('Por favor, ingrese un DNI válido de 8 o 9 dígitos.');
     }
 
-    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/index?dni=${dni}`, {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones?dni=${dni}`, { // Ajustado query param
         method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
     });
 
-    // Usamos la utilidad
     return handleResponse(response);
 };
 
-
-/**
- * Corrige los datos específicos de una evaluación.
- * @param {number} evaluacionId - El ID de la evaluación a corregir.
- * @param {object} data - Los datos a actualizar.
- * @returns {Promise<any>}
- */
 export const correctEvaluacion = async (evaluacionId, data) => {
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/correct/${evaluacionId}`, {
         method: 'PUT',
@@ -77,7 +112,6 @@ export const correctEvaluacion = async (evaluacionId, data) => {
         body: JSON.stringify(data),
     });
 
-    // Usamos la misma utilidad de manejo de respuestas
     return handleResponse(response);
 };
 

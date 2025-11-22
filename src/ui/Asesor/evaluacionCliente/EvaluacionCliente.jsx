@@ -1,4 +1,3 @@
-// src/pages/NuevaEvaluacion.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import createEvaluacion from 'services/evaluacionClienteService';
@@ -31,8 +30,7 @@ const initialState = {
         monto_ultima_compra: 0,
         detalleInventario: []
     },
-    // NUEVO ESTADO PARA GARANTÍAS (Array de objetos)
-    garantias: [] 
+    garantias: [] // Array para múltiples garantías
 };
 
 const NuevaEvaluacion = () => {
@@ -89,7 +87,7 @@ const NuevaEvaluacion = () => {
             ...prev, 
             usuario: flattenedUsuario, 
             aval: avalData,
-            // Si la respuesta incluyera garantías previas, las cargaríamos aquí
+            // Si recuperas garantías previas, descomenta esto:
             // garantias: data.garantias || []
         }));
         
@@ -109,34 +107,98 @@ const NuevaEvaluacion = () => {
     };
     
     const handleInputChange = (e, formType) => {
+        // Lógica especial para cuando se actualiza el array de garantías directamente
+        if (formType === null && e.target.name === 'garantias') {
+             setFormData(prev => ({ ...prev, garantias: e.target.value }));
+             return;
+        }
+
         const { name, value } = e.target;
-        // Caso especial para 'garantias' que es un array directo en el root de formData (si así lo decidimos)
-        // Ojo: En el state 'garantias' está en el primer nivel, así que formType no aplica igual si se pasa directo.
-        // Pero como en GarantiasForm llamamos con name='garantias', manejémoslo:
-        
+
         if (name === 'garantias') {
-            // Actualización directa del array de garantías
             setFormData(prev => ({ ...prev, garantias: value }));
         } else {
-            // Actualización de objetos anidados (usuario, credito, etc)
             setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: value } }));
         }
     };
 
+    // --- NUEVA LÓGICA DE VALIDACIÓN ---
+    const validateForm = () => {
+        // 1. Validar Cliente
+        if (!formData.usuario.dni || !formData.usuario.nombre || !formData.usuario.apellidoPaterno) {
+            showToast('Faltan datos básicos del Cliente (Sección 1). Busque un cliente por DNI.', 'error');
+            return false;
+        }
+        if (!formData.usuario.firmaCliente) {
+            showToast('Debe adjuntar la Firma del Cliente (Sección 1).', 'error');
+            return false;
+        }
+
+        // 2. Validar Unidad Familiar
+        if (!formData.unidadFamiliar.gastos_alimentacion || !formData.unidadFamiliar.gastos_servicios) {
+            showToast('Complete los Gastos Familiares obligatorios (Sección 2).', 'error');
+            return false;
+        }
+
+        // 3. Validar Negocio
+        if (!formData.datosNegocio.ventas_diarias || formData.datosNegocio.ventas_diarias <= 0) {
+             showToast('Las Ventas Diarias deben ser mayor a 0 (Sección 3).', 'error');
+             return false;
+        }
+        if (!formData.datosNegocio.monto_efectivo) {
+            showToast('Ingrese el Efectivo Actual del negocio (Sección 3).', 'error');
+            return false;
+        }
+
+        // 4. Validar Garantías (Iterar sobre el array)
+        if (formData.garantias.length > 0) {
+            for (let i = 0; i < formData.garantias.length; i++) {
+                const g = formData.garantias[i];
+                if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
+                    showToast(`Faltan datos en la Garantía #${i + 1} (Clase, Descripción o Valor Comercial).`, 'error');
+                    return false;
+                }
+            }
+        }
+
+        // 5. Validar Aval (SOLO si el check está activo)
+        if (hasAval) {
+            if (!formData.aval.dniAval || !formData.aval.nombresAval) {
+                showToast('Ha marcado que TIENE AVAL, por favor complete sus datos (Sección 5).', 'error');
+                return false;
+            }
+            if (!formData.aval.firmaAval) {
+                showToast('Debe adjuntar la Firma del Aval (Sección 5).', 'error');
+                return false;
+            }
+        }
+
+        // 6. Validar Crédito
+        if (!formData.credito.montoPrestamo || !formData.credito.cuotas || !formData.credito.tasaInteres) {
+            showToast('Complete los datos del Crédito Solicitado (Sección 6).', 'error');
+            return false;
+        }
+
+        return true;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Ejecutar validación antes de enviar
+        if (!validateForm()) {
+            return; // Detener si hay errores
+        }
+
         setIsLoading(true);
         try {
-            // Preparar payload
+            // Preparar payload final
             const dataToSend = {
                 ...formData,
-                aval: hasAval ? formData.aval : {} 
+                aval: hasAval ? formData.aval : null // Enviar null o vacío si no hay aval
             };
 
-            // ---------------------------------------------------------
-            // IMPRESIÓN EN CONSOLA ANTES DE ENVIAR (Solicitado)
-            // ---------------------------------------------------------
-            console.log(">>> JSON A ENVIAR AL BACKEND:", JSON.stringify(dataToSend, null, 2));
+            console.log(">>> PAYLOAD:", JSON.stringify(dataToSend, null, 2));
             
             await createEvaluacion(dataToSend);
             
@@ -145,7 +207,7 @@ const NuevaEvaluacion = () => {
             
         } catch (error) {
             console.error("Error al enviar:", error);
-            showToast(error, 'error'); 
+            showToast(error.message || 'Error al guardar la evaluación', 'error'); 
         } finally {
             setIsLoading(false);
         }
@@ -183,24 +245,24 @@ const NuevaEvaluacion = () => {
                             />
                         </CollapsibleSection>
                         
-                        {/* 4. GARANTÍAS (NUEVA SECCIÓN) */}
+                        {/* 4. GARANTÍAS */}
                         <CollapsibleSection title="4. Garantías (Declaración Jurada / Reales)">
                             <GarantiasForm 
                                 formData={formData.garantias} 
-                                // Nota: Pasamos null como formType o manejamos la lógica en handleInputChange
+                                // Aquí pasamos null como formType para indicar que manejamos la lógica especial dentro de handleInputChange
                                 handleInputChange={(e) => handleInputChange(e, null)} 
                                 isDisabled={isClientLocked} 
                             />
                         </CollapsibleSection>
 
                         {/* CHECKBOX AVAL */}
-                        <div className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm">
+                        <div className="flex items-center p-4 bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:shadow-md">
                             <input 
                                 id="checkAval"
                                 type="checkbox" 
                                 checked={hasAval}
                                 onChange={(e) => setHasAval(e.target.checked)}
-                                className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2"
+                                className="w-5 h-5 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 cursor-pointer"
                             />
                             <label htmlFor="checkAval" className="ml-3 text-lg font-medium text-gray-900 cursor-pointer select-none">
                                 ¿Esta evaluación incluye un <strong>Aval</strong>?
@@ -209,13 +271,15 @@ const NuevaEvaluacion = () => {
 
                         {/* 5. AVAL (Condicional) */}
                         {hasAval && (
-                            <CollapsibleSection title="5. Datos del Aval">
-                                <AvalForm 
-                                    formData={formData.aval} 
-                                    handleInputChange={(e) => handleInputChange(e, 'aval')} 
-                                    isDisabled={isClientLocked} 
-                                />
-                            </CollapsibleSection>
+                            <div className="animate-fadeIn">
+                                <CollapsibleSection title="5. Datos del Aval">
+                                    <AvalForm 
+                                        formData={formData.aval} 
+                                        handleInputChange={(e) => handleInputChange(e, 'aval')} 
+                                        isDisabled={isClientLocked} 
+                                    />
+                                </CollapsibleSection>
+                            </div>
                         )}
                         
                         {/* 6. CREDITO */}
@@ -223,14 +287,25 @@ const NuevaEvaluacion = () => {
                             <CreditoForm formData={formData.credito} handleInputChange={(e) => handleInputChange(e, 'credito')} />
                         </CollapsibleSection>
 
-                        <div className="text-center pt-4">
-                            <button type="submit" className="w-full md:w-1/2 px-8 py-4 bg-green-600 text-white font-bold text-xl rounded-lg hover:bg-green-700 transition-colors shadow-lg">
+                        <div className="text-center pt-4 pb-10">
+                            <button type="submit" className="w-full md:w-1/2 px-8 py-4 bg-green-600 text-white font-bold text-xl rounded-lg hover:bg-green-700 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                                 Enviar Evaluación
                             </button>
                         </div>
                     </form>
                 </div>
             </div>
+            
+            {/* Estilos simples para animaciones */}
+            <style>{`
+                .animate-fadeIn {
+                    animation: fadeIn 0.3s ease-in-out;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+            `}</style>
         </>
     );
 };

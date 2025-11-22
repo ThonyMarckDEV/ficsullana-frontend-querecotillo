@@ -87,7 +87,7 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                         <label className="flex items-center cursor-pointer">
                                             <input 
                                                 type="checkbox" 
-                                                checked={item.es_declaracion_jurada === 1} 
+                                                checked={item.es_declaracion_jurada == 1} 
                                                 onChange={() => handleTypeChange(index, true)}
                                                 disabled={isDisabled}
                                                 className="form-checkbox text-blue-600 h-4 w-4"
@@ -97,7 +97,7 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                         <label className="flex items-center cursor-pointer">
                                             <input 
                                                 type="checkbox" 
-                                                checked={item.es_declaracion_jurada === 0} 
+                                                checked={item.es_declaracion_jurada == 0} 
                                                 onChange={() => handleTypeChange(index, false)}
                                                 disabled={isDisabled}
                                                 className="form-checkbox text-blue-600 h-4 w-4"
@@ -113,6 +113,7 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                         onChange={(e) => handleRowChange(index, 'moneda', e.target.value)}
                                         className="w-full border-gray-300 rounded text-xs p-1"
                                         disabled={isDisabled}
+                                        required // <--- OBLIGATORIO
                                     >
                                         <option value="PEN">S/.</option>
                                         <option value="USD">$</option>
@@ -120,24 +121,24 @@ const GarantiasForm = ({ formData, handleInputChange, isDisabled }) => {
                                 </td>
 
                                 <td className="px-2 py-2 align-top">
-                                    <input type="text" placeholder="Ej: Inmueble" value={item.clase_garantia} onChange={(e) => handleRowChange(index, 'clase_garantia', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <input type="text" placeholder="Ej: Inmueble" value={item.clase_garantia} onChange={(e) => handleRowChange(index, 'clase_garantia', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required /> 
                                 </td>
                                 <td className="px-2 py-2 align-top">
-                                    <input type="text" placeholder="Ej: Título" value={item.documento_garantia} onChange={(e) => handleRowChange(index, 'documento_garantia', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <input type="text" placeholder="Ej: Título" value={item.documento_garantia} onChange={(e) => handleRowChange(index, 'documento_garantia', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required />
                                 </td>
                                 <td className="px-2 py-2 align-top">
-                                    <textarea rows="2" placeholder="Descripción..." value={item.descripcion_bien} onChange={(e) => handleRowChange(index, 'descripcion_bien', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <textarea rows="2" placeholder="Descripción..." value={item.descripcion_bien} onChange={(e) => handleRowChange(index, 'descripcion_bien', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required />
                                 </td>
                                 <td className="px-2 py-2 align-top">
-                                    <input type="text" placeholder="Dirección..." value={item.direccion_bien} onChange={(e) => handleRowChange(index, 'direccion_bien', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <input type="text" placeholder="Dirección..." value={item.direccion_bien} onChange={(e) => handleRowChange(index, 'direccion_bien', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required />
                                 </td>
                                 
                                 {/* Montos */}
                                 <td className="px-2 py-2 align-top">
-                                    <input type="number" placeholder="0.00" value={item.valor_comercial} onChange={(e) => handleRowChange(index, 'valor_comercial', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <input type="number" placeholder="0.00" value={item.valor_comercial} onChange={(e) => handleRowChange(index, 'valor_comercial', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required />
                                 </td>
                                 <td className="px-2 py-2 align-top">
-                                    <input type="number" placeholder="0.00" value={item.valor_realizacion} onChange={(e) => handleRowChange(index, 'valor_realizacion', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled}/>
+                                    <input type="number" placeholder="0.00" value={item.valor_realizacion} onChange={(e) => handleRowChange(index, 'valor_realizacion', e.target.value)} className="w-full border-gray-300 rounded text-xs p-1" disabled={isDisabled} required />
                                 </td>
 
                                 <td className="px-2 py-2 text-center align-top">
