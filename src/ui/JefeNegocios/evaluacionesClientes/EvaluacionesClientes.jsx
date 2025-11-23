@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { getEvaluaciones, updateStatusEvaluacion } from 'services/evaluacionClienteService'; 
+import { getEvaluaciones, updateStatusEvaluacion } from 'services/evaluacionClienteService';
 import LoadingScreen from 'components/Shared/LoadingScreen';
-import Pagination from './components/Pagination'; 
+import Pagination from './components/Pagination';
 import RejectModal from './components/modals/RejectModal';
 import CreditScoreComponent from './components/CreditScoreComponent';
 import EvaluacionDetailComponent from './components/EvaluacionDetailComponent';
@@ -14,10 +14,10 @@ const EvaluacionesClientes = () => {
   const [allEvaluaciones, setAllEvaluaciones] = useState([]); // Lista completa
   const [searchDni, setSearchDni] = useState(''); // Input del filtro
   const [loading, setLoading] = useState(false);
-  
+
   // Paginación independiente por pestañas
   const [pages, setPages] = useState({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
-  
+
   // Modales
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedEvaluacion, setSelectedEvaluacion] = useState(null);
@@ -63,12 +63,12 @@ const EvaluacionesClientes = () => {
 
   const handleApprove = async (evaluacionId) => {
     if(!window.confirm("¿Está seguro de aprobar esta evaluación?")) return;
-    
+   
     setLoading(true);
     try {
       await updateStatusEvaluacion(evaluacionId, { estado: 1 });
       // Actualización optimista local (para no recargar todo)
-      setAllEvaluaciones(prev => prev.map(e => 
+      setAllEvaluaciones(prev => prev.map(e =>
         e.id === evaluacionId ? { ...e, estado: 1, observaciones: null } : e
       ));
       toast.success('Evaluación aprobada.');
@@ -87,11 +87,11 @@ const EvaluacionesClientes = () => {
 
   const handleReject = async () => {
     if (!rejectReason.trim()) return toast.warning('Ingrese un motivo.');
-    
+   
     setLoading(true);
     try {
       await updateStatusEvaluacion(selectedEvaluacion.id, { estado: 2, observaciones: rejectReason });
-      setAllEvaluaciones(prev => prev.map(e => 
+      setAllEvaluaciones(prev => prev.map(e =>
         e.id === selectedEvaluacion.id ? { ...e, estado: 2, observaciones: rejectReason } : e
       ));
       setShowRejectModal(false);
@@ -129,16 +129,17 @@ const EvaluacionesClientes = () => {
         {currentData.length > 0 ? (
           <div className="space-y-10">
             {currentData.map(eva => {
-                // Preparamos objeto para CreditScore
-                // NOTA: eva.cliente viene del backend (relationship), CreditScore espera { datosCliente: ... }
-                const clienteInfo = { 
-                    datosCliente: eva.cliente || eva.usuario, // Objeto usuario
-                    // Si tu CreditScoreComponent necesita más datos planos, agrégalos aquí
-                }; 
+                // Preparamos objeto clienteInfo basado en la estructura del JSON de respuesta
+                // cliente.datos -> datosCliente
+                // aval -> aval (puede ser null, así que fallback a {})
+                const clienteInfo = {
+                    datosCliente: eva.cliente?.datos || {}, // Estructura correcta del JSON
+                    aval: eva.aval || {}, // Aval de la evaluación
+                };
 
                 return (
                     <div key={eva.id} className="border border-gray-300 rounded-xl bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-                        
+                      
                         {/* 1. HEADER: CARD DEL CLIENTE + SCORE */}
                         <div className="bg-gray-50 p-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                             <div className="flex items-center gap-4">
@@ -153,12 +154,12 @@ const EvaluacionesClientes = () => {
                                         <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200">
                                             DNI: {clienteInfo.datosCliente?.dni || clienteInfo.datosCliente?.username}
                                         </span>
-                                        <span>📍 {clienteInfo.datosCliente?.distrito}, {clienteInfo.datosCliente?.departamento}</span>
+                                        <span>📍 {clienteInfo.datosCliente?.direcciones?.[0]?.distrito}, {clienteInfo.datosCliente?.direcciones?.[0]?.departamento}</span>
                                     </div>
                                 </div>
                             </div>
-                            
-                            {/* Componente de Score en la cabecera */}
+                           
+                            {/* Componente de Score en la cabecera - ahora usa la estructura correcta del JSON */}
                             <div className="w-full md:w-auto">
                                 <CreditScoreComponent clienteData={clienteInfo} />
                             </div>
@@ -179,13 +180,13 @@ const EvaluacionesClientes = () => {
                     </div>
                 );
             })}
-            
+          
             {/* Paginación */}
             <div className="mt-6 flex justify-center">
-                <Pagination 
-                    currentPage={currentPage} 
-                    totalPages={totalPages} 
-                    onPageChange={(p) => setPages(prev => ({ ...prev, [type]: p }))} 
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={(p) => setPages(prev => ({ ...prev, [type]: p }))}
                 />
             </div>
           </div>
@@ -198,14 +199,14 @@ const EvaluacionesClientes = () => {
       </section>
     );
   };
-  
+
   return (
     <>
       {loading && <LoadingScreen />}
       
       <div className="bg-gray-50 min-h-screen p-4 sm:p-8">
         <div className="max-w-6xl mx-auto">
-          
+        
           {/* HEADER Y FILTRO */}
           <div className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b pb-4">
@@ -222,9 +223,9 @@ const EvaluacionesClientes = () => {
                   <div className="flex-1 w-full">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Cliente</label>
                       <div className="relative">
-                        <input 
-                            type="text" 
-                            placeholder="Ingrese DNI para buscar..." 
+                        <input
+                            type="text"
+                            placeholder="Ingrese DNI para buscar..."
                             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pl-10 shadow-sm"
                             value={searchDni}
                             onChange={(e) => setSearchDni(e.target.value)}

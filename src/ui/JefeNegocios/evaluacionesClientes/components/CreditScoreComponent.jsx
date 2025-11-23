@@ -12,12 +12,12 @@ const CreditScoreComponent = ({ clienteData }) => {
   const triggerRef = useRef(null);
 
   // --- 2. Validación de Datos ---
-  // El componente padre (EvaluacionesClientes.jsx) ya envía la estructura correcta:
-  // { datosCliente: { ... }, aval: { ... } }
-  // No necesitamos transformar nada, solo validar que existan los datos.
+  // Ahora clienteData viene correctamente del JSON: { datosCliente: { ... }, aval: { ... } }
+  // Incluye contactos, direcciones, empleos, etc., dentro de datosCliente para el score y UserInfo
   const dataToUse = clienteData || { datosCliente: {}, aval: {} };
 
   // --- 3. Cálculo del Score ---
+  // calculateCreditScore ahora puede usar la estructura completa del JSON (datosCliente con sub-arrays)
   const result = calculateCreditScore(dataToUse);
   const { score, details = [] } = result;
   const rawScore = details.reduce((sum, detail) => sum + detail.points, 0);
@@ -35,7 +35,7 @@ const CreditScoreComponent = ({ clienteData }) => {
     const triggerRect = triggerRef.current.getBoundingClientRect();
     const tooltipRect = tooltipRef.current.getBoundingClientRect();
     const PADDING = 10;
-    
+   
     let top = triggerRect.top - tooltipRect.height - PADDING;
     let left = triggerRect.left + (triggerRect.width / 2) - (tooltipRect.width / 2);
 
@@ -44,7 +44,7 @@ const CreditScoreComponent = ({ clienteData }) => {
       left = window.innerWidth - tooltipRect.width - PADDING;
     }
     if (top < PADDING) top = triggerRect.bottom + PADDING;
-    
+   
     setTooltipStyle({ top: `${top}px`, left: `${left}px` });
   }, []);
 
@@ -108,7 +108,7 @@ const CreditScoreComponent = ({ clienteData }) => {
                 <h4 className="font-bold text-gray-700">Análisis de Riesgo</h4>
                 <span className="text-xs bg-gray-100 px-2 py-1 rounded text-gray-600">Raw: {rawScore} pts</span>
             </div>
-            
+           
             <ul className="text-xs space-y-2 max-h-[300px] overflow-y-auto">
               {details.length > 0 ? details.map((detail, index) => (
                 <li key={index} className="flex justify-between items-start gap-2 border-b border-gray-50 pb-1 last:border-0">
@@ -130,7 +130,7 @@ const CreditScoreComponent = ({ clienteData }) => {
         )}
       </div>
 
-      {/* Modal Info Cliente */}
+      {/* Modal Info Cliente - pasa dataToUse (estructura del JSON) a UserInfo */}
       <ClientModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}

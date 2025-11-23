@@ -15,7 +15,7 @@ const Section = ({ title, children }) => (
 );
 
 const UserInfo = ({ cliente }) => {
-  // cliente viene como { datosCliente: {...}, aval: {...} }
+  // cliente viene como { datosCliente: {...}, aval: {...} } del JSON de respuesta
   const { datosCliente } = cliente;
   if (!datosCliente) return <p>No hay datos del cliente.</p>;
 
@@ -23,13 +23,13 @@ const UserInfo = ({ cliente }) => {
     nombre, apellidoPaterno, apellidoMaterno, dni, fechaNacimiento,
     estadoCivil, nacionalidad, nivelEducativo, profesion, residePeru, expuestaPoliticamente
   } = datosCliente;
-  
-  // Extracción segura de arrays (si el backend ahora los envía)
+
+  // Extracción segura de arrays del JSON (contactos, direcciones, etc., están en datosCliente)
   const contacto = datosCliente.contactos?.[0] || {};
   const direccion = datosCliente.direcciones?.[0] || {};
   const empleo = datosCliente.empleos?.[0] || {};
   const cuenta = datosCliente.cuentas_bancarias?.[0] || {};
-  
+
   // El aval viene directo del objeto cliente (evaluación)
   const aval = cliente.aval || {};
 
