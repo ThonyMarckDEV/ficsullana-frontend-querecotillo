@@ -1,175 +1,199 @@
-// src/pages/EvaluacionesClientes.jsx
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { getEvaluaciones, updateStatusEvaluacion } from 'services/evaluacionClienteService'; 
-import { showClientByDNI } from 'services/clienteService';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import Pagination from './components/Pagination'; 
-import BuscarEvaluacionesPorDni from 'components/Shared/Comboboxes/BuscarEvaluacionesPorDni';
 import RejectModal from './components/modals/RejectModal';
 import CreditScoreComponent from './components/CreditScoreComponent';
-import { toast } from 'react-toastify';
-// ¡Importa el nuevo componente!
 import EvaluacionDetailComponent from './components/EvaluacionDetailComponent';
+import { toast } from 'react-toastify';
 
 const ITEMS_PER_PAGE = 3;
 
 const EvaluacionesClientes = () => {
-  const [dni, setDni] = useState('');
-  const [evaluaciones, setEvaluaciones] = useState([]);
-  const [clienteData, setClienteData] = useState(null);
+  // --- ESTADOS ---
+  const [allEvaluaciones, setAllEvaluaciones] = useState([]); // Lista completa
+  const [searchDni, setSearchDni] = useState(''); // Input del filtro
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  
+  // Paginación independiente por pestañas
   const [pages, setPages] = useState({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
+  
+  // Modales
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [selectedEvaluacion, setSelectedEvaluacion] = useState(null);
   const [rejectReason, setRejectReason] = useState('');
 
-  const handleEvaluacionesFound = async (data, searchDni) => {
-    // ... (sin cambios en esta función)
-    setLoading(true);
-    setEvaluaciones(data || []);
-    setHasSearched(true);
-    setError(null);
-    setDni(searchDni);
-    if (data && data.length > 0) {
-      try {
-        const details = await showClientByDNI(searchDni);
-        setClienteData(details);
-      } catch (detailsErr) {
-        console.error('Error al obtener detalles del cliente:', detailsErr);
-      }
-    } else {
-      setClienteData(null);
-    }
-    setLoading(false);
-  };
+  // --- CARGA INICIAL (AL MONTAR) ---
+  useEffect(() => {
+    fetchEvaluaciones();
+  }, []);
 
-  // Función para recargar los datos después de una corrección exitosa
-  const handleUpdateSuccess = useCallback(async () => {
-    if (!dni) return;
+  // Función para traer datos (con o sin filtro)
+  const fetchEvaluaciones = async (dniFilter = '') => {
     setLoading(true);
     try {
-        const data = await getEvaluaciones(dni);
-        // Usamos la función existente para actualizar el estado
-        handleEvaluacionesFound(data, dni);
-        toast.info("Datos de evaluaciones actualizados.");
+      const data = await getEvaluaciones(dniFilter);
+      setAllEvaluaciones(data || []);
+      // Reiniciar páginas al buscar
+      setPages({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
     } catch (err) {
-        toast.error("Error al refrescar los datos: " + (err.message || ''));
+      console.error(err);
+      toast.error("Error al cargar evaluaciones.");
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-  }, [dni]); // Se vuelve a crear solo si el DNI cambia
-
-  const handleClear = () => {
-    // ... (sin cambios)
-    setEvaluaciones([]);
-    setClienteData(null);
-    setHasSearched(false);
-    setError(null);
-    setPages({ pendientes: 1, aceptadas: 1, rechazadas: 1 });
   };
 
+  // Manejo del Filtro
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    fetchEvaluaciones(searchDni); // Llama al backend con el filtro
+  };
+
+  const handleReload = () => {
+    setSearchDni('');
+    fetchEvaluaciones(''); // Recargar todo limpio
+  };
+
+  // --- ACCIONES (Aprobar/Rechazar/Actualizar) ---
+  const handleUpdateSuccess = useCallback(() => {
+    toast.info("Actualizando lista...");
+    fetchEvaluaciones(searchDni); // Recargamos manteniendo el filtro actual
+  }, [searchDni]);
+
   const handleApprove = async (evaluacionId) => {
-    // ... (sin cambios)
+    if(!window.confirm("¿Está seguro de aprobar esta evaluación?")) return;
+    
     setLoading(true);
     try {
       await updateStatusEvaluacion(evaluacionId, { estado: 1 });
-      setEvaluaciones(evaluaciones.map(e => 
+      // Actualización optimista local (para no recargar todo)
+      setAllEvaluaciones(prev => prev.map(e => 
         e.id === evaluacionId ? { ...e, estado: 1, observaciones: null } : e
       ));
-      toast.success('Evaluación aprobada exitosamente.');
+      toast.success('Evaluación aprobada.');
     } catch (err) {
-      toast.error('Error al aprobar: ' + (err.message || 'Intente nuevamente.'));
+      toast.error(err.message || 'Error al aprobar.');
     } finally {
       setLoading(false);
     }
   };
 
   const openRejectModal = (evaluacion) => {
-    // ... (sin cambios)
     setSelectedEvaluacion(evaluacion);
     setRejectReason('');
     setShowRejectModal(true);
   };
 
   const handleReject = async () => {
-    // ... (sin cambios)
-    if (!rejectReason.trim()) {
-      alert('Especifique un motivo para el rechazo.');
-      return;
-    }
+    if (!rejectReason.trim()) return toast.warning('Ingrese un motivo.');
+    
     setLoading(true);
     try {
-      await updateStatusEvaluacion(selectedEvaluacion.id, { 
-        estado: 2, 
-        observaciones: rejectReason 
-      });
-      setEvaluaciones(evaluaciones.map(e => 
+      await updateStatusEvaluacion(selectedEvaluacion.id, { estado: 2, observaciones: rejectReason });
+      setAllEvaluaciones(prev => prev.map(e => 
         e.id === selectedEvaluacion.id ? { ...e, estado: 2, observaciones: rejectReason } : e
       ));
       setShowRejectModal(false);
-      setRejectReason('');
-      setSelectedEvaluacion(null);
-      toast.success('Evaluación rechazada exitosamente.');
+      toast.success('Evaluación rechazada.');
     } catch (err) {
-      toast.error('Error al rechazar: ' + (err.message || 'Intente nuevamente.'));
+      toast.error(err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleCloseModal = () => {
-    // ... (sin cambios)
-    setShowRejectModal(false);
-    setRejectReason('');
-    setSelectedEvaluacion(null);
-  };
-
+  // --- CLASIFICACIÓN DE DATOS ---
   const { pendientes, aceptadas, rechazadas } = useMemo(() => ({
-    pendientes: evaluaciones.filter(e => e.estado === 0),
-    aceptadas: evaluaciones.filter(e => e.estado === 1),
-    rechazadas: evaluaciones.filter(e => e.estado === 2),
-  }), [evaluaciones]);
+    pendientes: allEvaluaciones.filter(e => e.estado === 0),
+    aceptadas: allEvaluaciones.filter(e => e.estado === 1),
+    rechazadas: allEvaluaciones.filter(e => e.estado === 2),
+  }), [allEvaluaciones]);
 
-  // ####### SECCIÓN MODIFICADA #######
+  // --- RENDERIZADO DE SECCIONES ---
   const renderSection = (title, data, type) => {
     const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
     const currentPage = pages[type];
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const currentData = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+    const currentData = data.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-    const handlePageChange = (page) => {
-      setPages(prev => ({ ...prev, [type]: page }));
-    };
-    
-    const colorMap = {
-      Pendientes: 'text-yellow-600',
-      Aceptadas: 'text-green-600',
-      Rechazadas: 'text-red-600'
-    };
+    // Colores del título
+    const colorMap = { 'Pendientes': 'text-yellow-600', 'Aceptadas': 'text-green-600', 'Rechazadas': 'text-red-600' };
 
     return (
-      <section className="mb-12">
-        <h2 className={`text-2xl font-semibold ${colorMap[title]} mb-6`}>{title}</h2>
+      <section className="mb-12 animate-fadeIn">
+        <div className="flex items-center gap-2 mb-6 border-b pb-2">
+            <h2 className={`text-2xl font-bold ${colorMap[title]}`}>{title}</h2>
+            <span className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-bold shadow-sm">{data.length}</span>
+        </div>
+
         {currentData.length > 0 ? (
-          <>
-            {currentData.map(eva => (
-              // Usamos el nuevo componente aquí
-              <EvaluacionDetailComponent
-                  key={eva.id}
-                  evaluacion={eva}
-                  onUpdateSuccess={handleUpdateSuccess}
-                  onApprove={handleApprove}
-                  onReject={openRejectModal}
-                  isLoading={loading}
-                  isPending={type === 'pendientes'}
-              />
-            ))}
-            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={handlePageChange} />
-          </>
+          <div className="space-y-10">
+            {currentData.map(eva => {
+                // Preparamos objeto para CreditScore
+                // NOTA: eva.cliente viene del backend (relationship), CreditScore espera { datosCliente: ... }
+                const clienteInfo = { 
+                    datosCliente: eva.cliente || eva.usuario, // Objeto usuario
+                    // Si tu CreditScoreComponent necesita más datos planos, agrégalos aquí
+                }; 
+
+                return (
+                    <div key={eva.id} className="border border-gray-300 rounded-xl bg-white shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                        
+                        {/* 1. HEADER: CARD DEL CLIENTE + SCORE */}
+                        <div className="bg-gray-50 p-4 border-b border-gray-200 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-blue-600 text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-xl">
+                                    {clienteInfo.datosCliente?.nombre?.charAt(0)}
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-800">
+                                        {clienteInfo.datosCliente?.nombre} {clienteInfo.datosCliente?.apellidoPaterno} {clienteInfo.datosCliente?.apellidoMaterno}
+                                    </h3>
+                                    <div className="flex gap-3 text-sm text-gray-600">
+                                        <span className="bg-blue-100 text-blue-800 px-2 py-0.5 rounded border border-blue-200">
+                                            DNI: {clienteInfo.datosCliente?.dni || clienteInfo.datosCliente?.username}
+                                        </span>
+                                        <span>📍 {clienteInfo.datosCliente?.distrito}, {clienteInfo.datosCliente?.departamento}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            {/* Componente de Score en la cabecera */}
+                            <div className="w-full md:w-auto">
+                                <CreditScoreComponent clienteData={clienteInfo} />
+                            </div>
+                        </div>
+
+                        {/* 2. COMPONENTE DE DETALLE DE EVALUACIÓN */}
+                        <div className="p-4 bg-white">
+                            <div className="mb-2 text-xs text-gray-400 uppercase font-semibold tracking-wider">Detalle de la Solicitud #{eva.id}</div>
+                            <EvaluacionDetailComponent
+                                evaluacion={eva}
+                                onUpdateSuccess={handleUpdateSuccess}
+                                onApprove={handleApprove}
+                                onReject={openRejectModal}
+                                isLoading={loading}
+                                isPending={type === 'pendientes'}
+                            />
+                        </div>
+                    </div>
+                );
+            })}
+            
+            {/* Paginación */}
+            <div className="mt-6 flex justify-center">
+                <Pagination 
+                    currentPage={currentPage} 
+                    totalPages={totalPages} 
+                    onPageChange={(p) => setPages(prev => ({ ...prev, [type]: p }))} 
+                />
+            </div>
+          </div>
         ) : (
-          <p className="text-gray-500">No hay evaluaciones en este estado.</p>
+          <div className="flex flex-col items-center justify-center p-10 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg text-gray-400">
+              <span className="text-4xl mb-2">📭</span>
+              <p>No hay evaluaciones en estado <strong>{title}</strong>.</p>
+          </div>
         )}
       </section>
     );
@@ -178,52 +202,69 @@ const EvaluacionesClientes = () => {
   return (
     <>
       {loading && <LoadingScreen />}
+      
       <div className="bg-gray-50 min-h-screen p-4 sm:p-8">
-        <div className="max-w-4xl mx-auto">
-          {/* ... (resto del JSX sin cambios) */}
-          <h1 className="text-4xl font-bold text-gray-800 mb-8 border-b pb-4">Gestión de Evaluaciones - Jefe de Negocios</h1>
+        <div className="max-w-6xl mx-auto">
           
-          <BuscarEvaluacionesPorDni 
-            onEvaluacionesFound={handleEvaluacionesFound} 
-            onClear={handleClear}
-            variant="jefe"
-          />
+          {/* HEADER Y FILTRO */}
+          <div className="bg-white p-6 rounded-lg shadow-sm mb-8 border border-gray-200">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 border-b pb-4">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-800">Panel de Jefe de Negocios</h1>
+                    <p className="text-gray-500">Gestión y aprobación de créditos</p>
+                  </div>
+                  <button onClick={handleReload} className="text-sm text-blue-600 hover:underline mt-2 md:mt-0">
+                    🔄 Actualizar datos
+                  </button>
+              </div>
+              
+              <form onSubmit={handleSearchSubmit} className="flex flex-col md:flex-row gap-3 items-end">
+                  <div className="flex-1 w-full">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Cliente</label>
+                      <div className="relative">
+                        <input 
+                            type="text" 
+                            placeholder="Ingrese DNI para buscar..." 
+                            className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none pl-10 shadow-sm"
+                            value={searchDni}
+                            onChange={(e) => setSearchDni(e.target.value)}
+                        />
+                        <span className="absolute left-3 top-3.5 text-gray-400">🔍</span>
+                      </div>
+                  </div>
+                  <div className="flex gap-2 w-full md:w-auto">
+                    <button type="submit" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-bold transition-colors flex-1 md:flex-none shadow-md">
+                        Buscar
+                    </button>
+                    {searchDni && (
+                        <button type="button" onClick={handleReload} className="bg-gray-200 text-gray-700 px-4 py-3 rounded-lg hover:bg-gray-300 font-semibold transition-colors">
+                            Limpiar
+                        </button>
+                    )}
+                  </div>
+              </form>
+          </div>
 
-          {clienteData && (
-            <div className="mb-8 p-6 bg-white rounded-lg shadow-md border border-gray-200">
-              <h3 className="text-xl font-semibold mb-2">Resumen del Cliente</h3>
-              <p className="text-gray-700 mb-2"><strong>Nombre:</strong> {clienteData.datosCliente?.nombre} {clienteData.datosCliente?.apellidoPaterno} {clienteData.datosCliente?.apellidoMaterno}</p>
-              <CreditScoreComponent clienteData={clienteData} />
-            </div>
-          )}
+          {/* LISTADOS POR ESTADO */}
+          {renderSection('Pendientes', pendientes, 'pendientes')}
+          {renderSection('Aceptadas', aceptadas, 'aceptadas')}
+          {renderSection('Rechazadas', rechazadas, 'rechazadas')}
 
-          {error && <p className="text-center p-10 text-red-500 font-semibold">Error: {error}</p>}
-
-          {!hasSearched && !loading && (
-            <p className="text-center text-gray-500 mt-16">Ingrese un DNI para comenzar la búsqueda.</p>
-          )}
-
-          {hasSearched && !loading && evaluaciones.length === 0 && (
-            <p className="text-center text-gray-500 mt-16">No se encontraron evaluaciones para el DNI proporcionado.</p>
-          )}
-
-          {evaluaciones.length > 0 && (
-            <div>
-              {renderSection('Pendientes', pendientes, 'pendientes')}
-              {renderSection('Aceptadas', aceptadas, 'aceptadas')}
-              {renderSection('Rechazadas', rechazadas, 'rechazadas')}
-            </div>
-          )}
         </div>
       </div>
 
       <RejectModal
         isOpen={showRejectModal}
-        onClose={handleCloseModal}
+        onClose={() => setShowRejectModal(false)}
         onConfirm={handleReject}
         rejectReason={rejectReason}
         setRejectReason={setRejectReason}
       />
+
+      <style>{`
+        .animate-fadeIn { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
     </>
   );
 };
