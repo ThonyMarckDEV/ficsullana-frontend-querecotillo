@@ -1,6 +1,6 @@
 import React from 'react';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import API_BASE_URL from 'js/urlHelper';
 import logoFic from 'assets/img/Logo_FICSULLANA.png';
 import { getFirmasEvaluacion } from 'services/evaluacionClienteService';
@@ -57,16 +57,13 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         } catch (error) {
             console.error("Error obteniendo firmas:", error);
         }
-
         // Configuración global de fuentes y colores
         doc.setFont("helvetica");
         const headerColor = [70, 130, 180]; // Azul profesional
         const sectionColor = [240, 240, 240]; // Gris claro
         const textColor = [0, 0, 0];
         const lightGray = [230, 230, 230];
-
         let currentY = 20;
-
         // Función para agregar página si es necesario
         const checkNewPage = (y, margin = 20) => {
             if (y > 270) {
@@ -76,7 +73,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             }
             return y;
         };
-
         // Header profesional
         try {
             const logoBase64 = await getImageData(logoFic);
@@ -89,7 +85,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             doc.setTextColor(...textColor);
             doc.text("FIC SULLANA", 15, 18);
         }
-
         doc.setFont("helvetica", "bold");
         doc.setFontSize(16);
         doc.setTextColor(...headerColor);
@@ -99,9 +94,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.setTextColor(...textColor);
         doc.text(`Fecha: ${new Date().toLocaleDateString('es-PE')}`, 150, 18);
         doc.line(10, 25, 200, 25); // Línea separadora
-
         currentY = 30;
-
         // Función para título de sección profesional
         const drawSectionTitle = (title, y) => {
             doc.setFillColor(...sectionColor);
@@ -113,10 +106,9 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             doc.setTextColor(...textColor);
             return y + 9;
         };
-
         // Función para tabla de campos (usando autotable para profesionalismo)
         const addFieldsTable = (headers, rows, startY, options = {}) => {
-            doc.autoTable({
+            autoTable(doc, {
                 head: [headers],
                 body: rows,
                 startY: startY,
@@ -145,7 +137,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             });
             return doc.lastAutoTable.finalY + 5;
         };
-
         // 1. DATOS PERSONALES
         currentY = drawSectionTitle("1. DATOS PERSONALES DEL SOLICITANTE", currentY);
         const personalRows = [
@@ -172,7 +163,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         personalRows.push(['Situación Laboral', empleo.situacionLaboral || '']);
         currentY = addFieldsTable(['Campo', 'Valor'], personalRows, currentY, { labelWidth: 45, valueWidth: 145 });
         currentY = checkNewPage(currentY, 10);
-
         // 2. FAMILIA Y NEGOCIO (Usando autotable para mejor estructura)
         currentY = drawSectionTitle("2. UNIDAD FAMILIAR Y NEGOCIO", currentY);
         const familiaRows = [
@@ -189,7 +179,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             if (familia.ifi_3_nombre) familiaRows.push(['IFI 3 - Nombre / Cuota', `${familia.ifi_3_nombre}: ${currency(familia.ifi_3_cuota)}`]);
         }
         currentY = addFieldsTable(['Aspecto Familiar', 'Detalle'], familiaRows, currentY);
-
         const negocioRows = [
             ['Giro del Negocio', negocio.otros_ingresos_sector || 'Comercio'],
             ['Ventas Diarias Promedio', currency(negocio.ventas_diarias)],
@@ -202,7 +191,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         ];
         currentY = addFieldsTable(['Aspecto del Negocio', 'Detalle'], negocioRows, currentY);
         currentY = checkNewPage(currentY, 10);
-
         // 3. SOLICITUD DE CRÉDITO
         currentY = drawSectionTitle("3. SOLICITUD DE CRÉDITO", currentY);
         const solicitudRows = [
@@ -215,7 +203,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         ];
         currentY = addFieldsTable(['Campo', 'Valor'], solicitudRows, currentY);
         currentY = checkNewPage(currentY, 10);
-
         // 4. GARANTÍAS (Tabla profesional con autotable)
         currentY = drawSectionTitle("4. GARANTÍAS DEL SOLICITANTE", currentY);
         if (garantias.length > 0) {
@@ -226,7 +213,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                 currency(g.valor_comercial),
                 currency(g.valor_realizacion),
             ]);
-            doc.autoTable({
+            autoTable(doc, {
                 head: [garantiasHeaders],
                 body: garantiasBody,
                 startY: currentY,
@@ -244,7 +231,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             currentY += 10;
         }
         currentY = checkNewPage(currentY, 10);
-
         // 5. AVAL
         if (aval) {
             currentY = drawSectionTitle("5. DATOS PERSONALES DEL AVAL", currentY);
@@ -264,11 +250,9 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             currentY += 10;
         }
         currentY = checkNewPage(currentY, 10);
-
         // 6. FIRMAS (Mejorado con cajas y alineación)
         currentY = drawSectionTitle("6. FIRMA DE LOS SOLICITANTES", currentY);
         const signatureY = currentY + 5;
-
         // Firma Cliente
         doc.setDrawColor(100, 100, 100);
         doc.setLineWidth(0.5);
@@ -286,7 +270,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.setFont("helvetica", "normal");
         doc.text(`${clienteDatos.nombre || ''} ${clienteDatos.apellidoPaterno || ''}`, 20, signatureY + 30);
         doc.text(`DNI: ${clienteDatos.dni || ''}`, 20, signatureY + 35);
-
         // Firma Aval si aplica
         if (aval) {
             doc.rect(105, signatureY, 85, 35);
@@ -303,13 +286,11 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             doc.text(`${aval.nombresAval || ''} ${aval.apellidoPaternoAval || ''}`, 110, signatureY + 30);
             doc.text(`DNI: ${aval.dniAval || ''}`, 110, signatureY + 35);
         }
-
         // Pie de página
         doc.setFontSize(8);
         doc.setTextColor(128, 128, 128);
         doc.text('Documento generado automáticamente por el sistema FIC Sullana', 10, 290);
         doc.text(`ID Evaluación: ${data.id} | Página ${doc.internal.getNumberOfPages()}`, 150, 290);
-
         doc.save(`Solicitud_Credito_${clienteDatos.dni || 'N/A'}.pdf`);
     };
 
@@ -323,7 +304,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                     <div className="w-full h-48 flex items-center justify-center overflow-hidden border border-gray-200 rounded bg-gray-50 cursor-pointer hover:opacity-90 transition-opacity"
                          onClick={() => window.open(fullUrl, '_blank')}>
                         <img src={fullUrl} alt={`Imagen ${titulo}`} className="max-h-full max-w-full object-contain"
-                            onError={(e) => { e.target.src = ''; e.target.alt = 'Error al cargar imagen'; }} />
+                             onError={(e) => { e.target.src = ''; e.target.alt = 'Error al cargar imagen'; }} />
                     </div>
                 ) : (
                     <div className={`w-full ${isSignature ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'} border rounded p-3 text-center`}>
@@ -358,7 +339,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                     <button onClick={onClose} className="text-gray-400 hover:text-red-600 font-bold text-3xl transition-colors">&times;</button>
                 </div>
                 <div className="p-6 overflow-y-auto space-y-8">
-                   
+                  
                     {/* SECCIÓN 1: CRÉDITO */}
                     <section>
                          <h3 className="text-lg font-bold text-blue-800 border-b border-blue-200 pb-2 mb-3 flex items-center gap-2">1. Crédito Solicitado</h3>
@@ -376,7 +357,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                     <section>
                         <h3 className="text-lg font-bold text-yellow-700 border-b border-yellow-200 pb-2 mb-3">2. Unidad Familiar y Gastos</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                           
+                          
                             {/* Columna Izquierda: Gastos Generales */}
                             <div className="space-y-2">
                                 <h4 className="font-bold text-yellow-800 border-b border-yellow-200 pb-1 mb-2">Gastos del Hogar</h4>
@@ -433,7 +414,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                     {/* SECCIÓN 3: NEGOCIO COMPLETO */}
                     <section>
                         <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">3. Datos del Negocio e Inventario</h3>
-                       
+                      
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
                             {/* Panel Izquierdo: Operatividad */}
                             <div className="bg-gray-50 p-4 rounded border text-sm space-y-3">
@@ -458,7 +439,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                                     <div><span className="font-semibold block">Efectivo Caja:</span> {currency(negocio.monto_efectivo)} (Dias: {negocio.dias_efectivo})</div>
                                     <div><span className="font-semibold block">Última Compra:</span> {negocio.fecha_ultima_compra} ({currency(negocio.monto_ultima_compra)})</div>
                                 </div>
-                               
+                                
                                 {/* Cuentas por Cobrar */}
                                 <div className="bg-blue-50 p-2 rounded border border-blue-100 mt-2">
                                     <span className="font-bold text-blue-800 block text-xs mb-1">CUENTAS POR COBRAR</span>
