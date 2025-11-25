@@ -88,7 +88,6 @@ const AvalForm = ({ formData, handleInputChange, isDisabled }) => {
               accept="image/png, image/jpeg, image/jpg" 
               onChange={handleImageChange} 
               className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
-              disabled={isDisabled}
               // AQUÍ ESTÁ LA MAGIA: Es requerido SOLO si el estado está vacío
               required={!formData.firmaAval} 
           />
