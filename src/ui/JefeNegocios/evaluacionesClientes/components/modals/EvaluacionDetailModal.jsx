@@ -5,8 +5,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
     if (!isOpen || !data) return null;
 
     // --- MAPEO DE DATOS ---
-    // Aseguramos acceder a la estructura correcta según tu JSON
-    const clienteDatos = data.cliente?.datos || {}; // Accedemos a datos dentro de cliente
+    const clienteDatos = data.cliente?.datos || {}; 
     const negocio = data.datos_negocio || {};
     const inventario = negocio.detalle_inventario || [];
     const familia = data.unidad_familiar || {};
@@ -16,8 +15,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
     // Formateador de moneda
     const currency = (val) => val ? `S/ ${parseFloat(val).toFixed(2)}` : 'S/ 0.00';
 
-    // --- COMPONENTE INTERNO PARA MOSTRAR FIRMA ---
-    const RenderFirma = ({ titulo, url, nombre }) => {
+    // --- COMPONENTE INTERNO PARA MOSTRAR IMAGEN (Firma o Foto) ---
+    const RenderImagen = ({ titulo, url, descripcion, isSignature = false }) => {
         // Construir URL completa si existe ruta relativa
         const fullUrl = url ? `${API_BASE_URL}${url}` : null;
 
@@ -26,25 +25,30 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                 <h4 className="font-bold text-gray-700 mb-2 border-b w-full text-center pb-1">
                     {titulo}
                 </h4>
-                <p className="text-xs text-gray-500 mb-3">{nombre}</p>
+                {descripcion && <p className="text-xs text-gray-500 mb-3 text-center">{descripcion}</p>}
 
                 {fullUrl ? (
-                    <div className="w-full h-40 flex items-center justify-center overflow-hidden border border-gray-200 rounded bg-gray-50">
+                    <div className="w-full h-48 flex items-center justify-center overflow-hidden border border-gray-200 rounded bg-gray-50 cursor-pointer hover:opacity-90 transition-opacity" 
+                         onClick={() => window.open(fullUrl, '_blank')}>
                         <img 
                             src={fullUrl} 
-                            alt={`Firma ${titulo}`} 
+                            alt={`Imagen ${titulo}`} 
                             className="max-h-full max-w-full object-contain"
                             onError={(e) => { e.target.src = ''; e.target.alt = 'Error al cargar imagen'; }}
                         />
                     </div>
                 ) : (
-                    <div className="w-full bg-red-50 border border-red-200 rounded p-3 text-center animate-pulse">
-                        <div className="text-3xl mb-1">❌</div>
-                        <p className="font-bold text-red-600 text-sm mb-1">SIN FIRMA DIGITAL</p>
-                        <p className="text-xs text-red-500 italic">
-                            Sugerencia: Rechazar con observación <br/>
-                            <strong>"Agregar firma del {titulo.toLowerCase()}"</strong>
+                    <div className={`w-full ${isSignature ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'} border rounded p-3 text-center`}>
+                        <div className="text-3xl mb-1">{isSignature ? '❌' : '📷'}</div>
+                        <p className={`font-bold ${isSignature ? 'text-red-600' : 'text-gray-400'} text-sm mb-1`}>
+                            {isSignature ? 'SIN FIRMA DIGITAL' : 'Sin Imagen'}
                         </p>
+                        {isSignature && (
+                            <p className="text-xs text-red-500 italic">
+                                Sugerencia: Rechazar con observación <br/>
+                                <strong>"Agregar firma del {titulo.toLowerCase()}"</strong>
+                            </p>
+                        )}
                     </div>
                 )}
             </div>
@@ -110,7 +114,25 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                             <div className="col-span-2"><span className="font-semibold text-gray-600">Última Compra:</span> {negocio.fecha_ultima_compra} ({currency(negocio.monto_ultima_compra)})</div>
                         </div>
 
+                        {/* Evidencias Fotográficas del Negocio */}
+                        <div className="mb-6">
+                            <h4 className="font-semibold text-gray-700 mb-3 text-sm border-l-4 border-blue-500 pl-2">Evidencias Fotográficas</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <RenderImagen 
+                                    titulo="Apuntes de Cobranza"
+                                    descripcion="Evidencia de Cuentas por Cobrar"
+                                    url={negocio.url_foto_cobranza}
+                                />
+                                <RenderImagen 
+                                    titulo="Activo Fijo"
+                                    descripcion={`Valor ref: ${currency(negocio.valor_actual_activo_fijo)}`}
+                                    url={negocio.url_foto_activo_fijo}
+                                />
+                            </div>
+                        </div>
+
                         {/* Tabla Inventario */}
+                        <h4 className="font-semibold text-gray-700 mb-2 text-sm ml-1">Detalle de Inventario</h4>
                         <div className="overflow-hidden border rounded-lg shadow-sm">
                             <table className="min-w-full text-sm text-left">
                                 <thead className="bg-gray-100 font-bold text-gray-600">
@@ -176,7 +198,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                         </section>
                     )}
 
-                    {/* 6. FIRMAS (NUEVA SECCIÓN) */}
+                    {/* 6. FIRMAS */}
                     <section className="bg-gray-100 p-4 rounded-lg border border-gray-200">
                         <h3 className="text-lg font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">
                             6. Validación de Firmas
@@ -184,18 +206,20 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             
                             {/* Firma Cliente */}
-                            <RenderFirma 
+                            <RenderImagen 
                                 titulo="Firma del Cliente" 
-                                nombre={`${clienteDatos.nombre || ''} ${clienteDatos.apellidoPaterno || ''}`}
+                                descripcion={`${clienteDatos.nombre || ''} ${clienteDatos.apellidoPaterno || ''}`}
                                 url={clienteDatos.url_firma} 
+                                isSignature={true}
                             />
 
                             {/* Firma Aval (Solo si existe aval) */}
                             {aval ? (
-                                <RenderFirma 
+                                <RenderImagen 
                                     titulo="Firma del Aval" 
-                                    nombre={`${aval.nombresAval || ''} ${aval.apellidoPaternoAval || ''}`}
+                                    descripcion={`${aval.nombresAval || ''} ${aval.apellidoPaternoAval || ''}`}
                                     url={aval.url_firma} 
+                                    isSignature={true}
                                 />
                             ) : (
                                 <div className="border rounded-lg p-4 flex flex-col items-center justify-center bg-gray-50 h-full text-gray-400">
