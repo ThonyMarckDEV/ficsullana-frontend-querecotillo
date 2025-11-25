@@ -3,7 +3,6 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable'; 
 import API_BASE_URL from 'js/urlHelper';
 import logoFic from 'assets/img/Logo_FICSULLANA.png'; 
-// IMPORTANTE: Importamos el nuevo servicio
 import { getFirmasEvaluacion } from 'services/evaluacionClienteService';
 
 const PdfIcon = () => (
@@ -12,7 +11,6 @@ const PdfIcon = () => (
     </svg>
 );
 
-// Helper simple para el LOGO LOCAL (este no tiene problemas de CORS)
 const getImageData = (url) => {
     return new Promise((resolve) => {
         if (!url) { resolve(null); return; }
@@ -30,7 +28,6 @@ const getImageData = (url) => {
     });
 };
 
-// Helper para visualización en pantalla (etiquetas <img>)
 const buildUrl = (path) => {
     if (!path) return null;
     if (path.startsWith('http')) return path; 
@@ -52,45 +49,26 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
 
     const currency = (val) => val ? `S/ ${parseFloat(val).toFixed(2)}` : 'S/ 0.00';
 
-    // --- GENERAR PDF (ESTRATEGIA PROXY) ---
+    // --- GENERAR PDF ---
     const generatePDF = async () => {
-        const doc = new jsPDF({
-            orientation: 'p',
-            unit: 'mm',
-            format: 'a4'
-        });
+        const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
 
-        // 1. OBTENER FIRMAS DESDE EL BACKEND (BASE64)
-        // Esto evita el bloqueo CORS del navegador
         let firmasBase64 = { firma_cliente: null, firma_aval: null };
         try {
-            console.log("Solicitando firmas al backend (Proxy)...");
-            // Llamamos al endpoint nuevo
             const response = await getFirmasEvaluacion(data.id);
-            if(response) {
-                firmasBase64 = response;
-                console.log("Firmas recibidas correctamente.");
-            }
+            if(response) firmasBase64 = response;
         } catch (error) {
-            console.error("Error obteniendo firmas del servidor:", error);
-            // No detenemos el PDF, se generará sin firmas si falla
+            console.error("Error obteniendo firmas:", error);
         }
 
-        // Configuración fuente
+        // Header
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
-
-        // --- LOGO (Local) ---
         try {
             const logoBase64 = await getImageData(logoFic);
-            if (logoBase64) {
-                doc.addImage(logoBase64, 'PNG', 10, 2, 50, 30); 
-            } else {
-                doc.text("Fic Sullana", 12, 20);
-            }
-        } catch (e) {
-            doc.text("Fic Sullana", 12, 20);
-        }
+            if (logoBase64) doc.addImage(logoBase64, 'PNG', 10, 2, 50, 30); 
+            else doc.text("Fic Sullana", 12, 20);
+        } catch (e) { doc.text("Fic Sullana", 12, 20); }
         
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
@@ -98,7 +76,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.setFontSize(8);
         doc.text(`FECHA: ${new Date().toLocaleDateString()}`, 170, 20);
 
-        // --- HELPERS DIBUJO ---
         let currentY = 40; 
         
         const drawSectionTitle = (title, y) => {
@@ -118,12 +95,10 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             doc.text(label, x + 1, y + 3); 
             doc.setFont("helvetica", "bold");
             doc.setFontSize(9);
-            const textValue = String(value || "").substring(0, 35); 
+            const textValue = String(value || "").substring(0, 40); 
             doc.text(textValue, x + 1, y + 7); 
         };
 
-        // ... [SECCIONES 1 a 5 IGUALES QUE ANTES] ...
-        
         // 1. DATOS PERSONALES
         currentY = drawSectionTitle("1. DATOS PERSONALES DEL SOLICITANTE", currentY);
         drawField("Doc. Identidad", clienteDatos.dni, 10, currentY, 30);
@@ -155,7 +130,11 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.text("A. De la Unidad Familiar", 10, currentY + 4);
-        doc.rect(10, currentY + 5, 90, 35); 
+        
+        // Aumentamos altura del cuadro familiar para que quepan las IFIs
+        const boxHeightFamilia = 50; 
+        doc.rect(10, currentY + 5, 90, boxHeightFamilia); 
+        
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
         let innerY = currentY + 10;
@@ -164,21 +143,45 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.text(`3. Gastos Educación: ${currency(familia.gastos_educacion)}`, 12, innerY); innerY += 5;
         doc.text(`4. Gastos Servicios: ${currency(familia.gastos_servicios)}`, 12, innerY); innerY += 5;
         doc.text(`5. Gastos Salud: ${currency(familia.gastos_salud)}`, 12, innerY); innerY += 5;
-        doc.text(`6. Deudas IFIs: ${familia.tiene_deudas_ifis ? 'SI' : 'NO'}`, 12, innerY);
+        doc.text(`6. Deudas IFIs: ${familia.tiene_deudas_ifis ? 'SI' : 'NO'}`, 12, innerY); innerY += 5;
 
+        // --- DETALLE DE DEUDAS IFIS EN PDF ---
+        if (familia.tiene_deudas_ifis) {
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(7);
+            doc.text("Detalle de Deudas:", 12, innerY); innerY += 4;
+            doc.setFont("helvetica", "normal");
+            
+            if(familia.ifi_1_nombre) {
+                doc.text(`- ${familia.ifi_1_nombre}: ${currency(familia.ifi_1_cuota)}`, 15, innerY); innerY += 3.5;
+            }
+            if(familia.ifi_2_nombre) {
+                doc.text(`- ${familia.ifi_2_nombre}: ${currency(familia.ifi_2_cuota)}`, 15, innerY); innerY += 3.5;
+            }
+            if(familia.ifi_3_nombre) {
+                doc.text(`- ${familia.ifi_3_nombre}: ${currency(familia.ifi_3_cuota)}`, 15, innerY);
+            }
+        }
+
+        // B. Negocio
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.text("B. Del Negocio (Resumen)", 105, currentY + 4);
-        doc.rect(105, currentY + 5, 95, 35); 
-        innerY = currentY + 10;
+        doc.rect(105, currentY + 5, 95, boxHeightFamilia); 
+        
+        let innerYNeg = currentY + 10;
         doc.setFont("helvetica", "normal");
         doc.setFontSize(8);
-        doc.text(`Ventas Diarias: ${currency(negocio.ventas_diarias)}`, 108, innerY); innerY += 5;
-        doc.text(`Efectivo Actual: ${currency(negocio.monto_efectivo)}`, 108, innerY); innerY += 5;
-        doc.text(`Activo Fijo: ${currency(negocio.valor_actual_activo_fijo)}`, 108, innerY); innerY += 5;
-        doc.text(`Última Compra: ${currency(negocio.monto_ultima_compra)} (${negocio.fecha_ultima_compra})`, 108, innerY); innerY += 5;
-        doc.text(`Gastos Operativos: ${currency(negocio.gastos_operativos_variables)}`, 108, innerY);
-        currentY += 45; 
+        doc.text(`Giro: ${negocio.otros_ingresos_sector || 'Comercio'}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Ventas Diarias: ${currency(negocio.ventas_diarias)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Efectivo Actual: ${currency(negocio.monto_efectivo)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Activo Fijo: ${currency(negocio.valor_actual_activo_fijo)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Última Compra: ${currency(negocio.monto_ultima_compra)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Gastos Operativos: ${currency(negocio.gastos_operativos_variables)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Cuentas x Cobrar: ${currency(negocio.cuentas_por_cobrar_monto)}`, 108, innerYNeg); innerYNeg += 5;
+        doc.text(`Zona: ${negocio.zona_ubicacion || '-'}`, 108, innerYNeg);
+
+        currentY += (boxHeightFamilia + 10); 
 
         // 3. SOLICITUD
         currentY = drawSectionTitle("3. SOLICITUD DE CRÉDITO", currentY);
@@ -230,7 +233,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
              currentY += 10;
         }
 
-        // --- 7. FIRMAS (AQUÍ ESTÁ LA MAGIA) ---
+        // 7. FIRMAS
         if (currentY > 240) {
             doc.addPage();
             currentY = 20;
@@ -243,16 +246,10 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         
         // FIRMA CLIENTE
         doc.rect(20, signatureBoxY, 80, 40); 
-        
-        // Usamos el Base64 que vino del backend
         if (firmasBase64.firma_cliente) {
             try {
-                // Ajusta el formato si tu backend devuelve jpeg (aunque normalmente es png)
-                // 'PNG' suele funcionar bien para data URIs
                 doc.addImage(firmasBase64.firma_cliente, 'PNG', 30, signatureBoxY + 2, 60, 25);
-            } catch (error) {
-                console.warn("Error pintando firma cliente", error);
-            }
+            } catch (error) { console.warn(error); }
         }
         
         doc.setFontSize(8);
@@ -263,15 +260,11 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         // FIRMA AVAL
         if (aval) {
             doc.rect(110, signatureBoxY, 80, 40);
-            
             if (firmasBase64.firma_aval) {
                 try {
-                     doc.addImage(firmasBase64.firma_aval, 'PNG', 120, signatureBoxY + 2, 60, 25);
-                } catch (error) {
-                    console.warn("Error pintando firma aval", error);
-                }
+                      doc.addImage(firmasBase64.firma_aval, 'PNG', 120, signatureBoxY + 2, 60, 25);
+                } catch (error) { console.warn(error); }
             }
-
             doc.text("AVAL DE CRÉDITO", 135, signatureBoxY + 32);
             doc.text(`${aval.nombresAval} ${aval.apellidoPaternoAval}`, 115, signatureBoxY + 36);
             doc.text(`DNI: ${aval.dniAval}`, 115, signatureBoxY + 39);
@@ -280,7 +273,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.save(`Solicitud_Credito_${clienteDatos.dni}.pdf`);
     };
 
-    // RenderImagen para la vista PREVIA (HTML) - Sigue usando URL normal
     const RenderImagen = ({ titulo, url, descripcion, isSignature = false }) => {
         const fullUrl = buildUrl(url); 
         return (
@@ -290,15 +282,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                 {fullUrl ? (
                     <div className="w-full h-48 flex items-center justify-center overflow-hidden border border-gray-200 rounded bg-gray-50 cursor-pointer hover:opacity-90 transition-opacity" 
                          onClick={() => window.open(fullUrl, '_blank')}>
-                        <img 
-                            src={fullUrl} 
-                            alt={`Imagen ${titulo}`} 
-                            className="max-h-full max-w-full object-contain"
-                            onError={(e) => { 
-                                e.target.src = ''; 
-                                e.target.alt = 'Error al cargar imagen'; 
-                            }}
-                        />
+                        <img src={fullUrl} alt={`Imagen ${titulo}`} className="max-h-full max-w-full object-contain"
+                            onError={(e) => { e.target.src = ''; e.target.alt = 'Error al cargar imagen'; }} />
                     </div>
                 ) : (
                     <div className={`w-full ${isSignature ? 'bg-red-50 border-red-200' : 'bg-gray-50 border-gray-200'} border rounded p-3 text-center`}>
@@ -320,13 +305,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                         <div className="flex items-center gap-3">
                             <h2 className="text-2xl font-bold text-gray-800">Detalle de Evaluación #{data.id}</h2>
                             {data.estado === 1 && (
-                                <button 
-                                    onClick={generatePDF}
-                                    className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow-sm text-sm font-bold transition-all transform hover:scale-105"
-                                    title="Descargar Solicitud en PDF"
-                                >
-                                    <PdfIcon />
-                                    Generar Solicitud PDF
+                                <button onClick={generatePDF} className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded shadow-sm text-sm font-bold transition-all transform hover:scale-105" title="Descargar Solicitud en PDF">
+                                    <PdfIcon /> Generar Solicitud PDF
                                 </button>
                             )}
                         </div>
@@ -339,7 +319,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                 </div>
 
                 <div className="p-6 overflow-y-auto space-y-8">
-                    {/* RESTO DE LA INTERFAZ HTML (IGUAL QUE ANTES) */}
+                    
+                    {/* SECCIÓN 1: CRÉDITO */}
                     <section>
                          <h3 className="text-lg font-bold text-blue-800 border-b border-blue-200 pb-2 mb-3 flex items-center gap-2">1. Crédito Solicitado</h3>
                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm bg-blue-50 p-4 rounded-lg border border-blue-100">
@@ -352,27 +333,119 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                              </div>
                          </div>
                     </section>
-                    {/* ... (SECCIONES 2, 3, 4, 5...) */}
+
+                    {/* SECCIÓN 2: UNIDAD FAMILIAR COMPLETA */}
                     <section>
-                        <h3 className="text-lg font-bold text-yellow-700 border-b border-yellow-200 pb-2 mb-3">2. Unidad Familiar</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm bg-yellow-50 p-4 rounded-lg border border-yellow-100">
-                            <div><span className="font-semibold text-gray-600">Carga Familiar:</span> {familia.numero_miembros} miembros</div>
-                            <div><span className="font-semibold text-gray-600">Deudas IFIs:</span> {familia.tiene_deudas_ifis ? 'SÍ' : 'NO'}</div>
-                            <div><span className="font-semibold text-gray-600">Alimentación:</span> {currency(familia.gastos_alimentacion)}</div>
-                            <div><span className="font-semibold text-gray-600">Servicios:</span> {currency(familia.gastos_servicios)}</div>
-                            <div><span className="font-semibold text-gray-600">Educación:</span> {currency(familia.gastos_educacion)}</div>
-                            <div><span className="font-semibold text-gray-600">Salud:</span> {currency(familia.gastos_salud)}</div>
+                        <h3 className="text-lg font-bold text-yellow-700 border-b border-yellow-200 pb-2 mb-3">2. Unidad Familiar y Gastos</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm bg-yellow-50 p-4 rounded-lg border border-yellow-100">
+                            
+                            {/* Columna Izquierda: Gastos Generales */}
+                            <div className="space-y-2">
+                                <h4 className="font-bold text-yellow-800 border-b border-yellow-200 pb-1 mb-2">Gastos del Hogar</h4>
+                                <div><span className="font-semibold text-gray-600">Carga Familiar:</span> {familia.numero_miembros} miembros</div>
+                                <div><span className="font-semibold text-gray-600">Alimentación:</span> {currency(familia.gastos_alimentacion)}</div>
+                                <div><span className="font-semibold text-gray-600">Servicios:</span> {currency(familia.gastos_servicios)}</div>
+                                <div><span className="font-semibold text-gray-600">Movilidad:</span> {currency(familia.gastos_movilidad)}</div>
+                            </div>
+
+                            {/* Columna Derecha: Salud y Educación */}
+                            <div className="space-y-2">
+                                <h4 className="font-bold text-yellow-800 border-b border-yellow-200 pb-1 mb-2">Salud y Educación</h4>
+                                <div>
+                                    <span className="font-semibold text-gray-600">Educación ({currency(familia.gastos_educacion)}):</span>
+                                    <p className="text-xs text-gray-500 italic ml-2">{familia.detalle_educacion || 'Sin detalle'}</p>
+                                </div>
+                                <div>
+                                    <span className="font-semibold text-gray-600">Salud ({currency(familia.gastos_salud)} - {familia.frecuencia_salud}):</span>
+                                    <p className="text-xs text-gray-500 italic ml-2">{familia.detalle_salud || 'Sin detalle'}</p>
+                                </div>
+                            </div>
+
+                            {/* Bloque Completo: Deudas IFIs */}
+                            <div className="col-span-1 md:col-span-2 mt-2 pt-2 border-t border-yellow-200">
+                                <div className="flex items-center gap-2 mb-2">
+                                    <span className="font-bold text-gray-700">Deudas Sistema Financiero:</span>
+                                    <span className={`px-2 py-0.5 rounded text-xs font-bold ${familia.tiene_deudas_ifis ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+                                        {familia.tiene_deudas_ifis ? 'SÍ TIENE' : 'NO TIENE'}
+                                    </span>
+                                </div>
+                                {familia.tiene_deudas_ifis === 1 && (
+                                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 bg-white p-2 rounded border border-yellow-200">
+                                        {familia.ifi_1_nombre && (
+                                            <div className="text-xs p-1 bg-gray-50 rounded">
+                                                <span className="font-bold block">{familia.ifi_1_nombre}</span>
+                                                <span className="text-red-600">Cuota: {currency(familia.ifi_1_cuota)}</span>
+                                            </div>
+                                        )}
+                                        {familia.ifi_2_nombre && (
+                                            <div className="text-xs p-1 bg-gray-50 rounded">
+                                                <span className="font-bold block">{familia.ifi_2_nombre}</span>
+                                                <span className="text-red-600">Cuota: {currency(familia.ifi_2_cuota)}</span>
+                                            </div>
+                                        )}
+                                        {familia.ifi_3_nombre && (
+                                            <div className="text-xs p-1 bg-gray-50 rounded">
+                                                <span className="font-bold block">{familia.ifi_3_nombre}</span>
+                                                <span className="text-red-600">Cuota: {currency(familia.ifi_3_cuota)}</span>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </section>
+
+                    {/* SECCIÓN 3: NEGOCIO COMPLETO */}
                     <section>
-                        <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">3. Negocio e Inventario</h3>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-6 bg-gray-50 p-4 rounded border">
-                            <div><span className="font-semibold text-gray-600 block">Ventas Diarias:</span> <span className="text-green-700 font-bold">{currency(negocio.ventas_diarias)}</span></div>
-                            <div><span className="font-semibold text-gray-600 block">Efectivo:</span> {currency(negocio.monto_efectivo)}</div>
-                            <div><span className="font-semibold text-gray-600 block">Activo Fijo:</span> {currency(negocio.valor_actual_activo_fijo)}</div>
-                            <div><span className="font-semibold text-gray-600 block">Gastos Op.:</span> {currency(negocio.gastos_operativos_variables)}</div>
-                            <div className="col-span-2"><span className="font-semibold text-gray-600">Última Compra:</span> {negocio.fecha_ultima_compra} ({currency(negocio.monto_ultima_compra)})</div>
+                        <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">3. Datos del Negocio e Inventario</h3>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                            {/* Panel Izquierdo: Operatividad */}
+                            <div className="bg-gray-50 p-4 rounded border text-sm space-y-3">
+                                <h4 className="font-bold text-gray-800 border-b pb-1">Operatividad y Ubicación</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div><span className="font-semibold block">Zona Ubicación:</span> {negocio.zona_ubicacion}</div>
+                                    <div><span className="font-semibold block">Atención:</span> {negocio.modalidad_atencion}</div>
+                                    <div><span className="font-semibold block">Ventas Diarias:</span> <span className="text-green-700 font-bold">{currency(negocio.ventas_diarias)}</span></div>
+                                    <div><span className="font-semibold block">Promedio Ventas:</span> {currency(negocio.promedio_ventas_pdt)}</div>
+                                </div>
+                                <div className="border-t pt-2">
+                                    <span className="font-semibold block mb-1">Activo Fijo ({currency(negocio.valor_actual_activo_fijo)}):</span>
+                                    <p className="text-xs italic text-gray-600 bg-white p-2 rounded border">{negocio.detalle_activo_fijo || 'No especificado'}</p>
+                                </div>
+                            </div>
+
+                            {/* Panel Derecho: Finanzas y Créditos */}
+                            <div className="bg-gray-50 p-4 rounded border text-sm space-y-3">
+                                <h4 className="font-bold text-gray-800 border-b pb-1">Finanzas y Crédito</h4>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <div><span className="font-semibold block text-red-600">Gastos Op. Var:</span> {currency(negocio.gastos_operativos_variables)}</div>
+                                    <div><span className="font-semibold block text-red-600">Gastos Adm. Fijos:</span> {currency(negocio.gastos_administrativos_fijos)}</div>
+                                    <div><span className="font-semibold block">Efectivo Caja:</span> {currency(negocio.monto_efectivo)} (Dias: {negocio.dias_efectivo})</div>
+                                    <div><span className="font-semibold block">Última Compra:</span> {negocio.fecha_ultima_compra} ({currency(negocio.monto_ultima_compra)})</div>
+                                </div>
+                                
+                                {/* Cuentas por Cobrar */}
+                                <div className="bg-blue-50 p-2 rounded border border-blue-100 mt-2">
+                                    <span className="font-bold text-blue-800 block text-xs mb-1">CUENTAS POR COBRAR</span>
+                                    <div className="flex justify-between items-center text-xs">
+                                        <span>Monto: <b>{currency(negocio.cuentas_por_cobrar_monto)}</b></span>
+                                        <span>Clientes: <b>{negocio.cuentas_por_cobrar_num_clientes}</b></span>
+                                        <span>Recup: <b>{negocio.tiempo_recuperacion}</b></span>
+                                    </div>
+                                </div>
+
+                                {/* Otros Ingresos */}
+                                <div className="bg-green-50 p-2 rounded border border-green-100 mt-1">
+                                    <div className="flex justify-between items-center text-xs mb-1">
+                                        <span className="font-bold text-green-800">OTROS INGRESOS ({negocio.otros_ingresos_frecuencia})</span>
+                                        <span className="font-bold text-green-700">{currency(negocio.otros_ingresos_monto)}</span>
+                                    </div>
+                                    <p className="text-xs text-gray-600 italic leading-tight">Sector: {negocio.otros_ingresos_sector} - {negocio.sustento_otros_ingresos}</p>
+                                </div>
+                            </div>
                         </div>
+
                         <div className="mb-6">
                             <h4 className="font-semibold text-gray-700 mb-3 text-sm border-l-4 border-blue-500 pl-2">Evidencias Fotográficas</h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -380,6 +453,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                                 <RenderImagen titulo="Activo Fijo" descripcion={`Valor ref: ${currency(negocio.valor_actual_activo_fijo)}`} url={negocio.url_foto_activo_fijo} />
                             </div>
                         </div>
+
                         <h4 className="font-semibold text-gray-700 mb-2 text-sm ml-1">Detalle de Inventario</h4>
                         <div className="overflow-hidden border rounded-lg shadow-sm">
                             <table className="min-w-full text-sm text-left">
@@ -402,6 +476,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                             </table>
                         </div>
                     </section>
+
+                    {/* SECCIÓN 4: GARANTÍAS (IGUAL) */}
                     <section>
                          <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">4. Garantías</h3>
                          <div className="grid gap-4 md:grid-cols-2">
@@ -420,6 +496,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                              )) : <p className="text-gray-500 text-sm col-span-2 bg-gray-50 p-4 rounded text-center">No hay garantías registradas.</p>}
                          </div>
                     </section>
+
+                    {/* SECCIÓN 5: AVAL (IGUAL) */}
                     {aval && (
                         <section>
                             <h3 className="text-lg font-bold text-purple-700 border-b border-purple-200 pb-2 mb-3">5. Datos del Aval</h3>
@@ -431,6 +509,8 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                             </div>
                         </section>
                     )}
+
+                    {/* SECCIÓN 6: FIRMAS */}
                     <section className="bg-gray-100 p-4 rounded-lg border border-gray-200">
                         <h3 className="text-lg font-bold text-gray-800 border-b border-gray-300 pb-2 mb-4">6. Validación de Firmas</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
