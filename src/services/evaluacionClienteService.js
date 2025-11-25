@@ -47,13 +47,28 @@ const createEvaluacion = async (formDataObj) => {
 };
 
 export const updateEvaluacion = async (evaluacionId, data) => {
+    // Detectamos si es FormData (tiene archivos) o JSON normal
+    const isFormData = data instanceof FormData;
+
+    // Si es FormData, usamos POST para evitar problemas de PHP con PUT + Archivos
+    // Si es JSON, mantenemos PUT (o lo que soporte tu API)
+    const method = isFormData ? 'POST' : 'PUT';
+
+    const headers = {
+        'Accept': 'application/json',
+    };
+
+    // IMPORTANTE: Solo agregamos Content-Type si es JSON.
+    // Si es FormData, dejamos que el navegador ponga 'multipart/form-data; boundary=...'
+    if (!isFormData) {
+        headers['Content-Type'] = 'application/json';
+    }
+
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/update/${evaluacionId}`, {
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify(data),
+        method: method,
+        headers: headers,
+        // Si es FormData se manda directo, si es objeto se stringifea
+        body: isFormData ? data : JSON.stringify(data),
     });
     
     return handleResponse(response);

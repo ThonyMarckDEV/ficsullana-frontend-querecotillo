@@ -4,54 +4,56 @@ import { updateEvaluacion, getEvaluacionDetail } from 'services/evaluacionClient
 
 // Importamos TODOS los formularios necesarios
 import UsuarioForm from './components/formularios/UsuarioForm'; 
-import DatosNegocioForm from './components/formularios/DatosNegocioForm'; // <--- Agregado
-import UnidadFamiliarForm from './components/formularios/UnidadFamiliarForm'; // <--- Agregado
-import GarantiasForm from './components/formularios/GarantiasForm'; // <--- Agregado
+import DatosNegocioForm from './components/formularios/DatosNegocioForm';
+import UnidadFamiliarForm from './components/formularios/UnidadFamiliarForm';
+import GarantiasForm from './components/formularios/GarantiasForm';
 import AvalForm from './components/formularios/AvalForm';
 
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
 // --- WHITELISTS PARA LIMPIEZA ---
-  const BASE_CREDITO_WHITELIST = [
-    'producto', 'montoPrestamo', 'tasaInteres', 'cuotas', 
-    'modalidadCredito', 'destinoCredito', 'periodoCredito', 'observaciones'
-  ];
+const BASE_CREDITO_WHITELIST = [
+  'producto', 'montoPrestamo', 'tasaInteres', 'cuotas', 
+  'modalidadCredito', 'destinoCredito', 'periodoCredito', 'observaciones',
+  'firma_cliente'  // Necesario para que pase el filtro
+];
 
-  const DATOS_NEGOCIO_WHITELIST = [
-    'otros_ingresos_sector', 'otros_ingresos_tiempo', 'riesgo_sector',
-    'otros_ingresos_monto', 'otros_ingresos_frecuencia', 'depende_otros_ingresos',
-    'sustento_otros_ingresos', 'tiene_medios_pago', 'descripcion_medios_pago',
-    'zona_ubicacion', 'modalidad_atencion', 'restriccion_actual',
-    'ventas_diarias', 'cuenta_con_ahorros', 'ahorros_sustentables',
-    'fecha_ultima_compra', 'monto_ultima_compra', 'variacion_compras_mes_anterior',
-    'cuentas_por_cobrar_monto', 'cuentas_por_cobrar_num_clientes', 'tiempo_recuperacion',
-    'foto_apuntes_cobranza', 'detalle_activo_fijo', 'valor_actual_activo_fijo',
-    'foto_activo_fijo', 'dias_efectivo', 'monto_efectivo',
-    'pagos_realizados_mes', 'gastos_administrativos_fijos', 'gastos_operativos_variables',
-    'imprevistos_mermas', 'promedio_ventas_pdt', 'contribucion_essalud_anual',
-    'referencias_comerciales'
-  ];
+const DATOS_NEGOCIO_WHITELIST = [
+  'otros_ingresos_sector', 'otros_ingresos_tiempo', 'riesgo_sector',
+  'otros_ingresos_monto', 'otros_ingresos_frecuencia', 'depende_otros_ingresos',
+  'sustento_otros_ingresos', 'tiene_medios_pago', 'descripcion_medios_pago',
+  'zona_ubicacion', 'modalidad_atencion', 'restriccion_actual',
+  'ventas_diarias', 'cuenta_con_ahorros', 'ahorros_sustentables',
+  'fecha_ultima_compra', 'monto_ultima_compra', 'variacion_compras_mes_anterior',
+  'cuentas_por_cobrar_monto', 'cuentas_por_cobrar_num_clientes', 'tiempo_recuperacion',
+  'foto_apuntes_cobranza', 'detalle_activo_fijo', 'valor_actual_activo_fijo',
+  'foto_activo_fijo', 'foto_negocio', 
+  'dias_efectivo', 'monto_efectivo',
+  'pagos_realizados_mes', 'gastos_administrativos_fijos', 'gastos_operativos_variables',
+  'imprevistos_mermas', 'promedio_ventas_pdt', 'contribucion_essalud_anual',
+  'referencias_comerciales'
+];
 
-  const UNIDAD_FAMILIAR_WHITELIST = [
-    'numero_miembros', 'gastos_alimentacion', 'gastos_educacion',
-    'detalle_educacion', 'gastos_servicios', 'gastos_movilidad',
-    'tiene_deudas_ifis', 'ifi_1_nombre', 'ifi_1_cuota',
-    'ifi_2_nombre', 'ifi_2_cuota', 'ifi_3_nombre', 'ifi_3_cuota',
-    'gastos_salud', 'frecuencia_salud', 'detalle_salud',
-    'total_gastos_mensuales'
-  ];
+const UNIDAD_FAMILIAR_WHITELIST = [
+  'numero_miembros', 'gastos_alimentacion', 'gastos_educacion',
+  'detalle_educacion', 'gastos_servicios', 'gastos_movilidad',
+  'tiene_deudas_ifis', 'ifi_1_nombre', 'ifi_1_cuota',
+  'ifi_2_nombre', 'ifi_2_cuota', 'ifi_3_nombre', 'ifi_3_cuota',
+  'gastos_salud', 'frecuencia_salud', 'detalle_salud',
+  'total_gastos_mensuales'
+];
 
-  const extractSection = (data, whitelist) => {
-    const section = {};
-    whitelist.forEach(field => {
-      if (data.hasOwnProperty(field)) {
-        section[field] = data[field];
-      }
-    });
-    return section;
-  };
-  
+const extractSection = (data, whitelist) => {
+  const section = {};
+  whitelist.forEach(field => {
+    if (data.hasOwnProperty(field)) {
+      section[field] = data[field];
+    }
+  });
+  return section;
+};
+
 const CorregirEvaluacion = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();
@@ -61,15 +63,12 @@ const CorregirEvaluacion = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-
   useEffect(() => {
     const cargarDatosEvaluacion = async () => {
       try {
         setLoading(true);
         const evaluacionData = await getEvaluacionDetail(id);
         
-        // --- 1. PREPARAR DATOS DEL CLIENTE ---
-        // Accedemos a la data anidada gracias al 'with' profundo del controller
         const clienteData = evaluacionData.cliente?.datos || {};
         const getFirst = (arr) => (arr && arr.length > 0 ? arr[0] : {});
 
@@ -78,11 +77,9 @@ const CorregirEvaluacion = () => {
         const empleo = getFirst(clienteData.empleos);
         const cuenta = getFirst(clienteData.cuentas_bancarias);
 
-        // --- 2. MAPEO AL ESTADO INICIAL ---
         const initialFormData = {
-          // A. USUARIO
           usuario: {
-            id: clienteData.id,
+            id: evaluacionData.cliente.id,
             nombre: clienteData.nombre,
             apellidoPaterno: clienteData.apellidoPaterno,
             apellidoMaterno: clienteData.apellidoMaterno,
@@ -115,23 +112,18 @@ const CorregirEvaluacion = () => {
             ctaAhorros: cuenta.ctaAhorros,
             cci: cuenta.cci,
             entidadFinanciera: cuenta.entidadFinanciera,
+            // Importante: Inicializar firmaCliente aquí si viene del input
+            firmaCliente: null 
           },
 
-          // B. CRÉDITO (Contenedor para Negocio, Familia, Garantías) - USAMOS WHITELISTS PARA EVITAR SPREAD SUCIO
           credito: {
-            // Solo campos base del crédito
             ...extractSection(evaluacionData, BASE_CREDITO_WHITELIST),
-            // Campos de negocio para los inputs del form
             ...extractSection(evaluacionData.datos_negocio || {}, DATOS_NEGOCIO_WHITELIST),
-            // Campos de familia para los inputs del form
             ...extractSection(evaluacionData.unidad_familiar || {}, UNIDAD_FAMILIAR_WHITELIST),
-            // Arrays
             garantias: evaluacionData.garantias || [],
             detalleInventario: evaluacionData.datos_negocio?.detalle_inventario || [],
-            // NO SPREAD DE OBJETOS ANIDADOS - Solo los campos que necesitan los forms via whitelists en submit
           },
 
-          // C. AVAL
           aval: evaluacionData.aval || {},
         };
 
@@ -140,7 +132,7 @@ const CorregirEvaluacion = () => {
         
       } catch (err) {
         console.error(err);
-        setError('No se pudo cargar la información de la evaluación. Verifique su conexión.');
+        setError('No se pudo cargar la información de la evaluación.');
         toast.error('Error al cargar datos.');
       } finally {
         setLoading(false);
@@ -153,21 +145,15 @@ const CorregirEvaluacion = () => {
   }, [id]);
   
   const handleInputChange = (e, formType) => {
-    // Manejo robusto para Inputs normales, Checkboxes, Files y Custom Events (Garantías)
-    const target = e.target || e; // A veces viene el evento, a veces el objeto directo
+    const target = e.target || e;
     const name = target.name;
     let value = target.value;
     const type = target.type;
     const files = target.files;
 
     if (type === 'file') {
-        value = files[0];
-    } else if (type === 'checkbox') {
-        // Asumiendo que tus sub-formularios envían 1 o 0, o lo manejamos aquí
-        // Si el componente hijo ya mandó el valor procesado (1/0), usamos 'value'
-        // Si es un evento nativo, usamos 'checked'
-        // Nota: Tus componentes hijos (UnidadFamiliarForm) ya hacen la conversión a 1/0
-    }
+        value = files[0]; // Guardamos el objeto File
+    } 
 
     setFormData(prev => ({
       ...prev,
@@ -178,40 +164,50 @@ const CorregirEvaluacion = () => {
     }));
   };
   
- const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
 
     try {
-      // --- CONSTRUCCIÓN DEL PAYLOAD LIMPIO CON WHITELISTS ---
       const creditoData = formData.credito || {};
+      const usuarioData = formData.usuario || {}; // Aquí está la firma actualmente
 
-      const payload = {
-        // A. Usuario (si se necesita actualizar, sino omitir)
-        usuario: formData.usuario,
-
-        // B. Crédito Base (solo campos whitelisteados)
+      const payloadObject = {
+        usuario: usuarioData,
         credito: extractSection(creditoData, BASE_CREDITO_WHITELIST),
-
-        // C. Datos Negocio (campos específicos + inventario)
         datosNegocio: {
           ...extractSection(creditoData, DATOS_NEGOCIO_WHITELIST),
-          detalleInventario: creditoData.detalleInventario || creditoData.detalle_inventario || []
+          detalleInventario: creditoData.detalleInventario || []
         },
-
-        // D. Unidad Familiar (campos específicos)
         unidadFamiliar: extractSection(creditoData, UNIDAD_FAMILIAR_WHITELIST),
-
-        // E. Garantías
         garantias: creditoData.garantias || [],
-
-        // F. Aval
         aval: showAval ? formData.aval : null,
       };
 
-      console.log("Payload FINAL Limpio:", payload); 
+      // --- DEBUG LOGS ---
+      console.log('=== PAYLOAD FINAL ===');
+      console.log('Firma Cliente (en credito):', payloadObject.credito.firma_cliente instanceof File ? "FILE OK" : payloadObject.credito.firma_cliente);
+      
+      // 3. CONVERSIÓN A FORMDATA
+      const payloadFormData = new FormData();
 
-      await updateEvaluacion(id, payload);
+      const buildFormData = (formData, data, parentKey) => {
+        if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
+          Object.keys(data).forEach(key => {
+            buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
+          });
+        } else {
+          const value = data == null ? '' : data;
+          formData.append(parentKey, value);
+        }
+      };
+      
+      buildFormData(payloadFormData, payloadObject);
+
+      payloadFormData.append('_method', 'PUT'); 
+
+      // 4. ENVIAR 
+      await updateEvaluacion(id, payloadFormData);
       
       navigate('/asesor/evaluaciones-enviadas');
       toast.success('Evaluación corregida exitosamente.');
@@ -248,12 +244,12 @@ const CorregirEvaluacion = () => {
                 <UsuarioForm 
                     formData={formData.usuario} 
                     handleInputChange={(e) => handleInputChange(e, 'usuario')} 
-                    isDisabled={false} // Permitir edición si es necesario corregir datos personales
+                    isDisabled={false} 
                 />
             )}
           </div>
 
-          {/* 2. DATOS DEL CRÉDITO (Desglosado en Sub-Formularios) */}
+          {/* 2. DATOS DEL CRÉDITO */}
           <div className="p-6 bg-white rounded-lg shadow-md border-t-4 border-yellow-500 mb-8">
             <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                 💼 2. Análisis del Crédito
@@ -261,7 +257,6 @@ const CorregirEvaluacion = () => {
             
             {formData && (
               <div className="space-y-10">
-                  {/* A. Datos del Negocio */}
                   <DatosNegocioForm 
                       formData={formData.credito}
                       handleInputChange={(e) => handleInputChange(e, 'credito')}
@@ -270,7 +265,6 @@ const CorregirEvaluacion = () => {
 
                   <hr className="border-gray-300" />
 
-                  {/* B. Unidad Familiar */}
                   <UnidadFamiliarForm 
                       formData={formData.credito}
                       handleInputChange={(e) => handleInputChange(e, 'credito')}
@@ -279,8 +273,6 @@ const CorregirEvaluacion = () => {
 
                   <hr className="border-gray-300" />
 
-                  {/* C. Garantías */}
-                  {/* Nota: GarantiasForm usa 'garantias' (array) que está dentro de formData.credito */}
                   <GarantiasForm 
                       formData={formData.credito.garantias} 
                       handleInputChange={(e) => handleInputChange(e, 'credito')}
