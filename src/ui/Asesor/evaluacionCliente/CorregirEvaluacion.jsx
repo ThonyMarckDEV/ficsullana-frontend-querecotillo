@@ -313,7 +313,7 @@ const CorregirEvaluacion = () => {
               type="submit"
               className="w-full md:w-1/2 px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white font-bold text-xl rounded-xl hover:shadow-xl transition-all transform hover:-translate-y-1"
             >
-              💾 Guardar Correcciones
+              Guardar Correcciones
             </button>
           </div>
         </form>
