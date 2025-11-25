@@ -104,7 +104,7 @@ function AppContent() {
 
         {/* Ruta Evaluación de Cliente */}
         <Route path="evaluacion-cliente" element={<EvaluacionCliente />} />
-        <Route path="evaluacion-cliente/:dniCliente" element={<CorregirEvaluacion />} />
+        <Route path="evaluacion-cliente/:id" element={<CorregirEvaluacion />} />
         {/* Ruta para Evaluaciones Enviadas */}
         <Route path="evaluaciones-enviadas" element={<EvaluacionesEnviadas />} />
 

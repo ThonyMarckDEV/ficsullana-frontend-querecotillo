@@ -1,10 +1,10 @@
 import React from 'react';
-// 1. Importar Link de react-router-dom para la navegación
 import { Link } from 'react-router-dom';
 
-// --- COMPONENTE PARA MOSTRAR UNA TARJETA DE EVALUACIÓN ---
 export const EvaluacionCard = ({ evaluacion }) => {
+  // 1. Extraemos el 'id' de la evaluación
   const { 
+    id, // <--- IMPORTANTE: Necesitamos el ID para la ruta de corrección
     cliente, producto, montoPrestamo, tasaInteres, cuotas,
     modalidadCredito, periodoCredito, destinoCredito, estado,
     observaciones, created_at 
@@ -78,10 +78,10 @@ export const EvaluacionCard = ({ evaluacion }) => {
             </div>
           )}
 
-          {/* 2. Añadir el botón "Corregir" que redirige a la ruta especificada */}
           <div className="text-right mt-4">
+            {/* 2. CORRECCIÓN: Usamos el ID de la evaluación en la URL */}
             <Link
-              to={`/asesor/evaluacion-cliente/${dniCliente}`}
+              to={`/asesor/evaluacion-cliente/${id}`} 
               className="inline-flex items-center px-4 py-2 bg-red-600 text-white font-bold text-sm rounded-lg hover:bg-red-700 transition-colors shadow"
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
