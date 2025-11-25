@@ -3,43 +3,17 @@ import API_BASE_URL from 'js/urlHelper';
 import { handleResponse } from 'utilities/Responses/handleResponse';
 
 /**
- * Crea una nueva evaluación enviando datos complejos y archivos.
- * @param {object} formDataObj - Objeto con toda la estructura del formulario.
+ * Crea una nueva evaluación.
+ * * CORRECCIÓN: Ahora acepta directamente el FormData que viene del componente.
+ * Ya no intenta re-procesar archivos ni convertir a JSON string manualmente,
+ * porque el componente 'NuevaEvaluacion.jsx' ya hizo ese trabajo.
+ * * @param {FormData} formData - El objeto FormData listo para enviar.
  */
-const createEvaluacion = async (formDataObj) => {
-    const formData = new FormData();
-
-    // 1. EXTRACCIÓN DE ARCHIVOS
-    if (formDataObj.usuario?.firmaCliente instanceof File) {
-        formData.append('firmaCliente', formDataObj.usuario.firmaCliente);
-    }
-    if (formDataObj.aval?.firmaAval instanceof File) {
-        formData.append('firmaAval', formDataObj.aval.firmaAval);
-    }
-    if (formDataObj.datosNegocio?.fotoApuntesCobranza instanceof File) {
-        formData.append('fotoApuntesCobranza', formDataObj.datosNegocio.fotoApuntesCobranza);
-    }
-    if (formDataObj.datosNegocio?.fotoActivoFijo instanceof File) {
-        formData.append('fotoActivoFijo', formDataObj.datosNegocio.fotoActivoFijo);
-    }
-
-    // 2. LIMPIEZA DEL JSON
-    const dataClean = JSON.parse(JSON.stringify(formDataObj));
-    delete dataClean.usuario.firmaCliente;
-    if (dataClean.aval) delete dataClean.aval.firmaAval;
-    if (dataClean.datosNegocio) {
-        delete dataClean.datosNegocio.fotoApuntesCobranza;
-        delete dataClean.datosNegocio.fotoActivoFijo;
-    }
-
-    // 3. EMPAQUETADO DEL JSON
-    formData.append('data', JSON.stringify(dataClean));
-
+const createEvaluacion = async (formData) => {
+    // Ya no creamos un 'new FormData()' aquí, usamos el que nos llega.
+    
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, {
         method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-        },
         body: formData,
     });
 

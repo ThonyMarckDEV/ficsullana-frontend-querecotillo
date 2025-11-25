@@ -205,7 +205,6 @@ const UsuarioForm = ({ formData, handleInputChange, isDisabled }) => {
                 accept="image/png, image/jpeg, image/jpg" 
                 onChange={handleImageChange} 
                 className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-50 file:text-red-700 hover:file:bg-red-100"
-                disabled={isDisabled}
                 // Nota: La validación de 'required' en archivo la hacemos manualmente en handleSubmit para mejor control
             />
             <p className="text-xs text-gray-500 mt-1">Formatos: JPG, JPEG, PNG.</p>

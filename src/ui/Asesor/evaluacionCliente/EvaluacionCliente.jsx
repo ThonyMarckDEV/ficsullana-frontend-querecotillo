@@ -45,6 +45,7 @@ const NuevaEvaluacion = () => {
     const handleClientFound = (data) => {
         const datos = data.datosCliente;
         
+        // Mapeo de datos (sin cambios)
         const flattenedUsuario = {
             id: datos.id, 
             nombre: datos.nombre, 
@@ -87,8 +88,7 @@ const NuevaEvaluacion = () => {
             ...prev, 
             usuario: flattenedUsuario, 
             aval: avalData,
-            // Si recuperas garantías previas, descomenta esto:
-            // garantias: data.garantias || []
+            // garantias: data.garantias || [] // Descomentar si deseas cargar garantías históricas
         }));
         
         setIsClientLocked(true);
@@ -112,39 +112,30 @@ const NuevaEvaluacion = () => {
              return;
         }
 
-        const { name, value } = e.target;
+        const { name, value, files } = e.target;
+        const finalValue = files ? files[0] : value;
 
         if (name === 'garantias') {
-            setFormData(prev => ({ ...prev, garantias: value }));
+            setFormData(prev => ({ ...prev, garantias: finalValue }));
         } else {
-            setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: value } }));
+            setFormData(prev => ({ ...prev, [formType]: { ...prev[formType], [name]: finalValue } }));
         }
     };
 
     const validateForm = () => {
-        console.log("---- VALIDANDO FORMULARIO ----");
-
-        // 1. Validar Datos Texto Cliente
+        // ... (Tu validación existente, sin cambios) ...
         if (!formData.usuario.dni || !formData.usuario.nombre || !formData.usuario.apellidoPaterno) {
             showToast('Faltan datos básicos del Cliente (Sección 1).', 'error');
             return false;
         }
-
-        // 1.1. VALIDAR FIRMA CLIENTE (OBLIGATORIO)
-        // Verificamos si es null, undefined o string vacío
         if (!formData.usuario.firmaCliente) {
-            console.error("FALLO: No se ha cargado la firma del cliente.");
             showToast('⚠️ FALTA: Debe subir la imagen de la Firma del Cliente (Sección 1).', 'error');
             return false;
         }
-
-        // 2. Validar Unidad Familiar
         if (Number(formData.unidadFamiliar.gastos_alimentacion) <= 0 || Number(formData.unidadFamiliar.gastos_servicios) <= 0) {
             showToast('Complete los Gastos Familiares (Sección 2). No pueden ser 0.', 'error');
             return false;
         }
-
-        // 3. Validar Negocio
         if (!formData.datosNegocio.ventas_diarias || Number(formData.datosNegocio.ventas_diarias) <= 0) {
              showToast('Las Ventas Diarias deben ser mayor a 0 (Sección 3).', 'error');
              return false;
@@ -153,14 +144,10 @@ const NuevaEvaluacion = () => {
             showToast('Ingrese el Efectivo Actual del negocio (Sección 3).', 'error');
             return false;
         }
-
-        // 4. Validar Garantías
         if (!formData.garantias || formData.garantias.length === 0) {
             showToast('Debe agregar al menos una fila en la tabla de Garantías (botón azul +).', 'error');
             return false;
         }
-
-        // Validar filas de garantías
         for (let i = 0; i < formData.garantias.length; i++) {
             const g = formData.garantias[i];
             if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
@@ -168,30 +155,69 @@ const NuevaEvaluacion = () => {
                 return false;
             }
         }
-
-        // 5. Validar Aval (SOLO SI EL CHECK ESTÁ ACTIVADO)
+       // 5. Validar Aval (ESTRICTO)
         if (hasAval) {
-            // 5.1 Validar Datos Texto Aval
-            if (!formData.aval.dniAval || !formData.aval.nombresAval) {
-                showToast('Ha marcado que TIENE AVAL, complete DNI y Nombre (Sección 5).', 'error');
+            const { 
+                dniAval, 
+                nombresAval, 
+                apellidoPaternoAval, 
+                apellidoMaternoAval,
+                telefonoMovilAval,
+                direccionAval,
+                referenciaDomicilioAval,
+                departamentoAval,
+                provinciaAval,
+                distritoAval,
+                relacionClienteAval,
+                firmaAval
+            } = formData.aval;
+
+            // A. Validar campos de texto
+            if (
+                !dniAval || 
+                !nombresAval || 
+                !apellidoPaternoAval || 
+                !apellidoMaternoAval || 
+                !telefonoMovilAval ||
+                !direccionAval ||
+                !referenciaDomicilioAval ||
+                !departamentoAval ||
+                !provinciaAval ||
+                !distritoAval ||
+                !relacionClienteAval
+            ) {
+                showToast('Ha marcado que TIENE AVAL. Debe completar TODOS sus datos personales y de ubicación.', 'error');
                 return false;
             }
 
-            // 5.2 VALIDAR FIRMA AVAL (OBLIGATORIO SI HAY AVAL)
-            if (!formData.aval.firmaAval) {
-                console.error("FALLO: No se ha cargado la firma del aval.");
+            // B. Validar longitud de DNI y Teléfono (Opcional pero recomendado)
+            if (String(dniAval).length !== 8) {
+                showToast('El DNI del Aval debe tener 8 dígitos.', 'error');
+                return false;
+            }
+
+           if (!formData.aval.firmaAval) {
                 showToast('⚠️ FALTA: Debe subir la imagen de la Firma del Aval (Sección 5).', 'error');
                 return false;
             }
         }
-
-        // 6. Validar Crédito
         if (!formData.credito.montoPrestamo || !formData.credito.cuotas || !formData.credito.tasaInteres) {
             showToast('Complete los datos del Crédito Solicitado (Sección 6).', 'error');
             return false;
         }
 
         return true;
+    };
+
+    const buildFormData = (formData, data, parentKey) => {
+        if (data && typeof data === 'object' && !(data instanceof Date) && !(data instanceof File)) {
+            Object.keys(data).forEach(key => {
+                buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
+            });
+        } else {
+            const value = data == null ? '' : data;
+            formData.append(parentKey, value);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -203,18 +229,41 @@ const NuevaEvaluacion = () => {
 
         setIsLoading(true);
         try {
-            const dataToSend = {
-                ...formData,
-                aval: hasAval ? formData.aval : null
-            };
+            const formDataToSend = new FormData();
+            const payload = { ...formData };
+            if (!hasAval) delete payload.aval;
 
-            if (!hasAval) {
-                delete dataToSend.aval;
+            buildFormData(formDataToSend, payload, '');
+
+            // --- 1. Firma Cliente ---
+            if (formData.usuario.firmaCliente instanceof File) {
+                formDataToSend.append('firmaCliente', formData.usuario.firmaCliente);
+            }
+
+            // --- 2. Firma Aval ---
+            if (hasAval && formData.aval.firmaAval instanceof File) {
+                formDataToSend.append('firmaAval', formData.aval.firmaAval);
+            }
+
+            // --- 3. FOTOS DEL NEGOCIO (CORRECCIÓN AÑADIDA) ---
+            // Se añaden manualmente al root del FormData para asegurar que el backend las lea
+            
+            // Foto Apuntes Cobranza
+            if (formData.datosNegocio.fotoApuntesCobranza instanceof File) {
+                formDataToSend.append('fotoApuntesCobranza', formData.datosNegocio.fotoApuntesCobranza);
             }
             
-            console.log(">>> PAYLOAD:", JSON.stringify(dataToSend, null, 2));
+            // Foto Activo Fijo
+            if (formData.datosNegocio.fotoActivoFijo instanceof File) {
+                formDataToSend.append('fotoActivoFijo', formData.datosNegocio.fotoActivoFijo);
+            }
+
+            // Foto Negocio (si aplica)
+            if (formData.datosNegocio.fotoNegocio instanceof File) {
+                formDataToSend.append('fotoNegocio', formData.datosNegocio.fotoNegocio);
+            }
             
-            await createEvaluacion(dataToSend);
+            await createEvaluacion(formDataToSend);
             
             showToast({ msg: 'Nueva evaluación creada con **éxito**!' }, 'success');
             navigate('/asesor/evaluaciones-enviadas');
@@ -240,7 +289,13 @@ const NuevaEvaluacion = () => {
 
                         {/* 1. CLIENTE */}
                         <CollapsibleSection title="1. Datos del Cliente">
-                            <UsuarioForm formData={formData.usuario} handleInputChange={(e) => handleInputChange(e, 'usuario')} isDisabled={isClientLocked} />
+                            {/* CORRECCIÓN: Se añade allowSignature={true}. Debes editar UsuarioForm para que use esta prop y NO deshabilite el input file */}
+                            <UsuarioForm 
+                                formData={formData.usuario} 
+                                handleInputChange={(e) => handleInputChange(e, 'usuario')} 
+                                isDisabled={isClientLocked} 
+                                allowSignature={true}
+                            />
                         </CollapsibleSection>
 
                         {/* 2. UNIDAD FAMILIAR */}
@@ -261,10 +316,11 @@ const NuevaEvaluacion = () => {
                         
                         {/* 4. GARANTÍAS */}
                         <CollapsibleSection title="4. Garantías (Declaración Jurada / Reales)">
+                            {/* CORRECCIÓN: Se quita isDisabled o se fuerza a false para permitir agregar garantías siempre */}
                             <GarantiasForm 
                                 formData={formData.garantias} 
                                 handleInputChange={(e) => handleInputChange(e, null)} 
-                                isDisabled={isClientLocked} 
+                                isDisabled={false} 
                             />
                         </CollapsibleSection>
 
