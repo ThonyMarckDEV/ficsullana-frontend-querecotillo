@@ -12,16 +12,7 @@ import AvalForm from './components/formularios/AvalForm';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
-const CorregirEvaluacion = () => {
-  const { id } = useParams(); 
-  const navigate = useNavigate();
-  
-  const [formData, setFormData] = useState(null);
-  const [showAval, setShowAval] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  // --- WHITELISTS PARA LIMPIEZA ---
+// --- WHITELISTS PARA LIMPIEZA ---
   const BASE_CREDITO_WHITELIST = [
     'producto', 'montoPrestamo', 'tasaInteres', 'cuotas', 
     'modalidadCredito', 'destinoCredito', 'periodoCredito', 'observaciones'
@@ -60,6 +51,16 @@ const CorregirEvaluacion = () => {
     });
     return section;
   };
+  
+const CorregirEvaluacion = () => {
+  const { id } = useParams(); 
+  const navigate = useNavigate();
+  
+  const [formData, setFormData] = useState(null);
+  const [showAval, setShowAval] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
 
   useEffect(() => {
     const cargarDatosEvaluacion = async () => {
