@@ -108,4 +108,15 @@ export const correctEvaluacion = async (evaluacionId, data) => {
     return handleResponse(response);
 };
 
+export const getFirmasEvaluacion = async (evaluacionId) => {
+    const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/${evaluacionId}/firmas`, {
+        method: 'GET',
+        headers: {
+            'Accept': 'application/json',
+        }
+    });
+
+    return handleResponse(response);
+};
+
 export default createEvaluacion;
