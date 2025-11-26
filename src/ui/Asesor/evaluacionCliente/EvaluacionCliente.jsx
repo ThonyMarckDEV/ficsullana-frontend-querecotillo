@@ -23,10 +23,13 @@ const initialState = {
     unidadFamiliar: {
         numero_miembros: 0,
         tiene_deudas_ifis: 0,
+        gastos_alimentacion: 0,
+        gastos_servicios: 0
     },
     datosNegocio: {
         otros_ingresos_monto: 0,
         ventas_diarias: 0,
+        monto_efectivo: 0,
         monto_ultima_compra: 0,
         detalleInventario: []
     },
@@ -39,13 +42,20 @@ const NuevaEvaluacion = () => {
 
     const [formData, setFormData] = useState(initialState);
     const [isClientLocked, setIsClientLocked] = useState(false);
+    
+    // NUEVO ESTADO: Controla específicamente el bloqueo del formulario de Aval
+    const [isAvalLocked, setIsAvalLocked] = useState(false);
+    
     const [isLoading, setIsLoading] = useState(false);
     const [hasAval, setHasAval] = useState(false);
+    
+    // Estado para almacenar los avales históricos encontrados
+    const [listaAvales, setListaAvales] = useState([]);
 
     const handleClientFound = (data) => {
         const datos = data.datosCliente;
         
-        // Mapeo de datos (sin cambios)
+        // Mapeo de datos del Cliente (Usuario)
         const flattenedUsuario = {
             id: datos.id, 
             nombre: datos.nombre, 
@@ -82,28 +92,29 @@ const NuevaEvaluacion = () => {
             entidadFinanciera: data.datosCliente.cuentas_bancarias[0]?.entidadFinanciera
         };
 
-        const avalData = data.aval || {};
-        
+        // 1. Guardamos la lista de avales históricos para el select.
+        setListaAvales(data.avales || []);
+
+        // 2. NO activamos hasAval automáticamente.
+        setHasAval(false);
+
+        // 3. Reseteamos el formulario de aval
         setFormData(prev => ({ 
             ...prev, 
             usuario: flattenedUsuario, 
-            aval: avalData,
-            // garantias: data.garantias || [] // Descomentar si deseas cargar garantías históricas
+            aval: {} 
         }));
         
         setIsClientLocked(true);
-
-        if (avalData && Object.keys(avalData).length > 0 && avalData.dniAval) {
-            setHasAval(true);
-        } else {
-            setHasAval(false);
-        }
+        setIsAvalLocked(false); // Aseguramos que empiece desbloqueado para nuevo aval
     };
 
     const handleClear = () => {
         setFormData(initialState);
         setIsClientLocked(false);
+        setIsAvalLocked(false);
         setHasAval(false);
+        setListaAvales([]); 
     };
     
     const handleInputChange = (e, formType) => {
@@ -122,8 +133,33 @@ const NuevaEvaluacion = () => {
         }
     };
 
+    // Función para manejar la selección de un aval histórico
+    const handleSelectAval = (e) => {
+        const index = e.target.value;
+        if (index === "") {
+            // OPCIÓN 1: Si elige "Nuevo Aval / Limpiar"
+            // Limpiamos los datos y DESBLOQUEAMOS los campos para escribir
+            setFormData(prev => ({ ...prev, aval: {} }));
+            setIsAvalLocked(false);
+        } else {
+            // OPCIÓN 2: Si elige un aval de la lista
+            // Cargamos los datos y BLOQUEAMOS los campos para no alterar el histórico
+            const avalSeleccionado = listaAvales[index];
+            
+            setFormData(prev => ({ 
+                ...prev, 
+                aval: {
+                    ...avalSeleccionado,
+                    firmaAval: null // La firma siempre debe subirse nueva
+                } 
+            }));
+            
+            setIsAvalLocked(true);
+            showToast('Datos del aval cargados. Por favor verifique y suba la firma.', 'info');
+        }
+    };
+
     const validateForm = () => {
-        // ... (Tu validación existente, sin cambios) ...
         if (!formData.usuario.dni || !formData.usuario.nombre || !formData.usuario.apellidoPaterno) {
             showToast('Faltan datos básicos del Cliente (Sección 1).', 'error');
             return false;
@@ -148,6 +184,7 @@ const NuevaEvaluacion = () => {
             showToast('Debe agregar al menos una fila en la tabla de Garantías (botón azul +).', 'error');
             return false;
         }
+        
         for (let i = 0; i < formData.garantias.length; i++) {
             const g = formData.garantias[i];
             if (!g.clase_garantia || !g.descripcion_bien || !g.valor_comercial) {
@@ -155,7 +192,8 @@ const NuevaEvaluacion = () => {
                 return false;
             }
         }
-       // 5. Validar Aval (ESTRICTO)
+
+       // Validar Aval (Si aplica)
         if (hasAval) {
             const { 
                 dniAval, 
@@ -168,11 +206,9 @@ const NuevaEvaluacion = () => {
                 departamentoAval,
                 provinciaAval,
                 distritoAval,
-                relacionClienteAval,
-                firmaAval
+                relacionClienteAval
             } = formData.aval;
 
-            // A. Validar campos de texto
             if (
                 !dniAval || 
                 !nombresAval || 
@@ -190,7 +226,6 @@ const NuevaEvaluacion = () => {
                 return false;
             }
 
-            // B. Validar longitud de DNI y Teléfono (Opcional pero recomendado)
             if (String(dniAval).length !== 8) {
                 showToast('El DNI del Aval debe tener 8 dígitos.', 'error');
                 return false;
@@ -201,6 +236,7 @@ const NuevaEvaluacion = () => {
                 return false;
             }
         }
+        
         if (!formData.credito.montoPrestamo || !formData.credito.cuotas || !formData.credito.tasaInteres) {
             showToast('Complete los datos del Crédito Solicitado (Sección 6).', 'error');
             return false;
@@ -235,30 +271,22 @@ const NuevaEvaluacion = () => {
 
             buildFormData(formDataToSend, payload, '');
 
-            // --- 1. Firma Cliente ---
             if (formData.usuario.firmaCliente instanceof File) {
                 formDataToSend.append('firmaCliente', formData.usuario.firmaCliente);
             }
 
-            // --- 2. Firma Aval ---
             if (hasAval && formData.aval.firmaAval instanceof File) {
                 formDataToSend.append('firmaAval', formData.aval.firmaAval);
             }
-
-            // --- 3. FOTOS DEL NEGOCIO (CORRECCIÓN AÑADIDA) ---
-            // Se añaden manualmente al root del FormData para asegurar que el backend las lea
             
-            // Foto Apuntes Cobranza
             if (formData.datosNegocio.fotoApuntesCobranza instanceof File) {
                 formDataToSend.append('fotoApuntesCobranza', formData.datosNegocio.fotoApuntesCobranza);
             }
             
-            // Foto Activo Fijo
             if (formData.datosNegocio.fotoActivoFijo instanceof File) {
                 formDataToSend.append('fotoActivoFijo', formData.datosNegocio.fotoActivoFijo);
             }
 
-            // Foto Negocio (si aplica)
             if (formData.datosNegocio.fotoNegocio instanceof File) {
                 formDataToSend.append('fotoNegocio', formData.datosNegocio.fotoNegocio);
             }
@@ -289,7 +317,6 @@ const NuevaEvaluacion = () => {
 
                         {/* 1. CLIENTE */}
                         <CollapsibleSection title="1. Datos del Cliente">
-                            {/* CORRECCIÓN: Se añade allowSignature={true}. Debes editar UsuarioForm para que use esta prop y NO deshabilite el input file */}
                             <UsuarioForm 
                                 formData={formData.usuario} 
                                 handleInputChange={(e) => handleInputChange(e, 'usuario')} 
@@ -316,7 +343,6 @@ const NuevaEvaluacion = () => {
                         
                         {/* 4. GARANTÍAS */}
                         <CollapsibleSection title="4. Garantías (Declaración Jurada / Reales)">
-                            {/* CORRECCIÓN: Se quita isDisabled o se fuerza a false para permitir agregar garantías siempre */}
                             <GarantiasForm 
                                 formData={formData.garantias} 
                                 handleInputChange={(e) => handleInputChange(e, null)} 
@@ -342,10 +368,35 @@ const NuevaEvaluacion = () => {
                         {hasAval && (
                             <div className="animate-fadeIn">
                                 <CollapsibleSection title="5. Datos del Aval">
+                                    {/* SELECTOR DE AVALES HISTÓRICOS */}
+                                    {listaAvales.length > 0 && (
+                                        <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                            <label className="block text-sm font-bold text-yellow-800 mb-2">
+                                                <i className="fas fa-history mr-2"></i>
+                                                Seleccionar Aval Registrado Anteriormente (Opcional):
+                                            </label>
+                                            <select
+                                                className="w-full p-3 border border-yellow-300 rounded-md shadow-sm focus:ring-2 focus:ring-yellow-500 bg-white"
+                                                onChange={handleSelectAval}
+                                                defaultValue=""
+                                            >
+                                                <option value="">-- Registrar Nuevo Aval / Limpiar --</option>
+                                                {listaAvales.map((av, index) => (
+                                                    <option key={index} value={index}>
+                                                        {av.dniAval} - {av.nombresAval} {av.apellidoPaternoAval} ({av.relacionClienteAval})
+                                                    </option>
+                                                ))}
+                                            </select>
+                                            <p className="text-xs text-yellow-700 mt-2 ml-1">
+                                                * Al seleccionar uno, se llenarán los datos y se bloquearán para edición.
+                                            </p>
+                                        </div>
+                                    )}
+
                                     <AvalForm 
                                         formData={formData.aval} 
                                         handleInputChange={(e) => handleInputChange(e, 'aval')} 
-                                        isDisabled={isClientLocked} 
+                                        isDisabled={isAvalLocked} 
                                     />
                                 </CollapsibleSection>
                             </div>
