@@ -72,24 +72,19 @@ export const updateStatusEvaluacion = async (evaluacionId, data) => {
     return handleResponse(response);
 };
 
-// --- AQUÍ ESTABA EL ERROR ---
-// Modificado para permitir búsqueda vacía (listar todo)
-export const getEvaluaciones = async (dni = '') => {
-    // Solo validamos longitud SI se ha escrito algo en el filtro
-    if (dni && (dni.length < 8 || dni.length > 9)) {
-        throw new Error('Por favor, ingrese un DNI válido de 8 o 9 dígitos.');
-    }
+export const getEvaluaciones = async (dni = '', fechaInicio = '', fechaFin = '') => {
+    // Construcción de URL con parámetros dinámicos
+    const params = new URLSearchParams();
+    
+    if (dni) params.append('dni', dni);
+    if (fechaInicio) params.append('fecha_inicio', fechaInicio);
+    if (fechaFin) params.append('fecha_fin', fechaFin);
 
-    // Construcción dinámica de la URL
-    const url = dni 
-        ? `${API_BASE_URL}/api/evaluaciones/index?dni=${dni}` 
-        : `${API_BASE_URL}/api/evaluaciones/index`;
+    const url = `${API_BASE_URL}/api/evaluaciones/index?${params.toString()}`;
 
     const response = await fetchWithAuth(url, { 
         method: 'GET',
-        headers: {
-            'Accept': 'application/json',
-        }
+        headers: { 'Accept': 'application/json' }
     });
 
     return handleResponse(response);
