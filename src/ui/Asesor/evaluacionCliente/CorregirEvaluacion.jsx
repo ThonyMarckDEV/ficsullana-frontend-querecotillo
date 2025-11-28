@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { updateEvaluacion, getEvaluacionDetail } from 'services/evaluacionClienteService';
+import API_BASE_URL from 'js/urlHelper'; // <--- 1. IMPORTANTE: Importar URL Helper
 
 // Importamos TODOS los formularios necesarios
 import UsuarioForm from './components/formularios/UsuarioForm'; 
@@ -12,11 +13,11 @@ import AvalForm from './components/formularios/AvalForm';
 import LoadingScreen from 'components/Shared/LoadingScreen';
 import { toast } from 'react-toastify';
 
-// --- WHITELISTS PARA LIMPIEZA ---
+// ... (Tus whitelists BASE_CREDITO_WHITELIST, etc. se mantienen igual) ...
 const BASE_CREDITO_WHITELIST = [
   'producto', 'montoPrestamo', 'tasaInteres', 'cuotas', 
   'modalidadCredito', 'destinoCredito', 'periodoCredito', 'observaciones',
-  'firma_cliente'  // Necesario para que pase el filtro
+  'firma_cliente'
 ];
 
 const DATOS_NEGOCIO_WHITELIST = [
@@ -54,6 +55,15 @@ const extractSection = (data, whitelist) => {
   return section;
 };
 
+// Helper para construir URL completa de la imagen existente
+const buildUrl = (path) => {
+    if (!path) return null;
+    if (path.startsWith('http')) return path; 
+    const cleanBase = API_BASE_URL.replace(/\/$/, ''); 
+    const cleanPath = path.startsWith('/') ? path : `/${path}`; 
+    return `${cleanBase}${cleanPath}`;
+};
+
 const CorregirEvaluacion = () => {
   const { id } = useParams(); 
   const navigate = useNavigate();
@@ -76,6 +86,15 @@ const CorregirEvaluacion = () => {
         const direccion = getFirst(clienteData.direcciones);
         const empleo = getFirst(clienteData.empleos);
         const cuenta = getFirst(clienteData.cuentas_bancarias);
+
+        // --- LÓGICA DE AVAL CORREGIDA ---
+        const avalData = evaluacionData.aval || {};
+        
+        // CORRECCIÓN CLAVE: Mapeamos 'url_firma' (Backend) a 'firmaAval' (Frontend)
+        // Esto hace que AvalForm detecte que YA HAY firma y quite el 'required'.
+        if (avalData.url_firma) {
+            avalData.firmaAval = buildUrl(avalData.url_firma);
+        }
 
         const initialFormData = {
           usuario: {
@@ -112,7 +131,7 @@ const CorregirEvaluacion = () => {
             ctaAhorros: cuenta.ctaAhorros,
             cci: cuenta.cci,
             entidadFinanciera: cuenta.entidadFinanciera,
-            // Importante: Inicializar firmaCliente aquí si viene del input
+            // Firma Cliente (Misma lógica si quisieras previsualizarla)
             firmaCliente: null 
           },
 
@@ -124,10 +143,11 @@ const CorregirEvaluacion = () => {
             detalleInventario: evaluacionData.datos_negocio?.detalle_inventario || [],
           },
 
-          aval: evaluacionData.aval || {},
+          aval: avalData, // Pasamos el objeto aval ya modificado con firmaAval
         };
 
         setFormData(initialFormData);
+        // Mostrar sección Aval si tiene DNI registrado
         setShowAval(!!evaluacionData.aval && !!evaluacionData.aval.dniAval);
         
       } catch (err) {
@@ -152,7 +172,7 @@ const CorregirEvaluacion = () => {
     const files = target.files;
 
     if (type === 'file') {
-        value = files[0]; // Guardamos el objeto File
+        value = files[0]; 
     } 
 
     setFormData(prev => ({
@@ -170,7 +190,7 @@ const CorregirEvaluacion = () => {
 
     try {
       const creditoData = formData.credito || {};
-      const usuarioData = formData.usuario || {}; // Aquí está la firma actualmente
+      const usuarioData = formData.usuario || {};
 
       const payloadObject = {
         usuario: usuarioData,
@@ -184,10 +204,6 @@ const CorregirEvaluacion = () => {
         aval: showAval ? formData.aval : null,
       };
 
-      // --- DEBUG LOGS ---
-      console.log('=== PAYLOAD FINAL ===');
-      console.log('Firma Cliente (en credito):', payloadObject.credito.firma_cliente instanceof File ? "FILE OK" : payloadObject.credito.firma_cliente);
-      
       // 3. CONVERSIÓN A FORMDATA
       const payloadFormData = new FormData();
 
@@ -197,6 +213,12 @@ const CorregirEvaluacion = () => {
             buildFormData(formData, data[key], parentKey ? `${parentKey}[${key}]` : key);
           });
         } else {
+          // IMPORTANTE: Si firmaAval es un string (URL existente), NO lo enviamos como texto en FormData
+          // Solo enviamos si es File o un dato normal.
+          // El backend asume que si no llega fichero, mantiene el anterior.
+          if (parentKey && parentKey.includes('firmaAval') && typeof data === 'string' && data.startsWith('http')) {
+             return; 
+          }
           const value = data == null ? '' : data;
           formData.append(parentKey, value);
         }
@@ -298,11 +320,12 @@ const CorregirEvaluacion = () => {
                 {showAval ? '✕ Quitar Aval' : '+ Añadir Aval'}
               </button>
             </div>
+            {/* Aquí pasamos isDisabled=false para poder editar el aval en corrección */}
             {showAval && formData && (
                 <AvalForm 
                     formData={formData.aval} 
                     handleInputChange={(e) => handleInputChange(e, 'aval')} 
-                    isDisabled={false}
+                    isDisabled={false} 
                 />
             )}
           </div>
