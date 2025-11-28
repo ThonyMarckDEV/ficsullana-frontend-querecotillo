@@ -4,13 +4,9 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
 
 /**
  * Crea una nueva evaluación.
- * * CORRECCIÓN: Ahora acepta directamente el FormData que viene del componente.
- * Ya no intenta re-procesar archivos ni convertir a JSON string manualmente,
- * porque el componente 'NuevaEvaluacion.jsx' ya hizo ese trabajo.
  * * @param {FormData} formData - El objeto FormData listo para enviar.
  */
 const createEvaluacion = async (formData) => {
-    // Ya no creamos un 'new FormData()' aquí, usamos el que nos llega.
     
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, {
         method: 'POST',
