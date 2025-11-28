@@ -7,10 +7,12 @@ import { handleResponse } from 'utilities/Responses/handleResponse';
  * * @param {FormData} formData - El objeto FormData listo para enviar.
  */
 const createEvaluacion = async (formData) => {
-    
     const response = await fetchWithAuth(`${API_BASE_URL}/api/evaluaciones/create`, {
         method: 'POST',
         body: formData,
+        headers: {
+            'Accept': 'application/json', 
+        }
     });
 
     return handleResponse(response);

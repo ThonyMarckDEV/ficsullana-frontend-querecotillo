@@ -73,30 +73,31 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         // --- ENCABEZADO ---
         doc.setFont("helvetica", "bold");
         
-        // LOGO: Más grande y centrado verticalmente con el título
+        // 1. LOGO: Arriba del todo, esquina izquierda
         try {
             const logoBase64 = await getImageData(logoFic);
             if (logoBase64) {
-                // x, y, ancho, alto -> Ajustado para ser más alto y visible
-                doc.addImage(logoBase64, 'PNG', 10, 5, 55, 25); 
+                // x=10, y=5 (Bien arriba)
+                // w=60, h=25 (Tamaño rectangular legible)
+               doc.addImage(logoBase64, 'PNG', 10, 2, 60, 45);
             } else {
-                doc.text("Fic Sullana", 15, 20);
+                doc.text("Fic Sullana", 10, 20);
             }
         } catch (e) {
-            doc.text("Fic Sullana", 15, 20);
+            doc.text("Fic Sullana", 10, 20);
         }
         
-        // TITULO CENTRADO CON EL LOGO
+        // 2. TÍTULO: Debajo del logo y CENTRADO en la página
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(14);
-        doc.text("FORMATO DE SOLICITUD DE CRÉDITO", 80, 18);
+        // x=105 es el centro de una hoja A4 (210mm ancho), align: 'center' centra el texto en ese punto
+        doc.text("FORMATO DE SOLICITUD DE CRÉDITO", 105, 40, { align: "center" });
         
-        // NOTA: La fecha se movió al final del documento por solicitud
-
-        let currentY = 35; // Bajamos un poco el inicio para dar espacio al logo grande
+        // 3. INICIO CONTENIDO: Dejamos espacio después del título
+        let currentY = 50; 
         
         const drawSectionTitle = (title, y) => {
-            doc.setFillColor(230, 230, 230); // Un gris un poco más claro para elegancia
+            doc.setFillColor(230, 230, 230); 
             doc.rect(10, y, 190, 6, 'F');
             doc.setFont("helvetica", "bold");
             doc.setFontSize(9);
@@ -105,18 +106,16 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             return y + 6;
         };
 
-        // Función mejorada para texto largo (WRAP)
         const drawField = (label, value, x, y, w, h = 8) => {
             doc.setFont("helvetica", "normal");
-            doc.setFontSize(6); // Etiqueta pequeña
+            doc.setFontSize(6);
             doc.rect(x, y, w, h); 
             doc.text(label, x + 1, y + 2.5); 
             
             doc.setFont("helvetica", "bold");
-            doc.setFontSize(8); // Texto dato
+            doc.setFontSize(8); 
             
             const textValue = String(value || "");
-            // maxWidth permite que el texto haga salto de línea si es muy largo
             doc.text(textValue, x + 1, y + 6, { maxWidth: w - 2 });
         };
 
@@ -148,8 +147,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         currentY += 10; 
 
         // --- 2. FAMILIA Y NEGOCIO ---
-        // Calculamos altura dinámica si hay muchas deudas
-        const boxHeight = familia.tiene_deudas_ifis ? 45 : 35; // Más alto si hay deudas
+        const boxHeight = familia.tiene_deudas_ifis ? 45 : 35; 
 
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
@@ -167,7 +165,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.text(`4. Servicios: ${currency(familia.gastos_servicios)}`, col1X, innerY); innerY += 4.5;
         doc.text(`5. Salud: ${currency(familia.gastos_salud)}`, col1X, innerY); innerY += 4.5;
         
-        // AGREGAR DEUDAS IFIS AL PDF
         if (familia.tiene_deudas_ifis) {
             doc.setFont("helvetica", "bold");
             doc.text("Deudas Financieras (IFIs):", col1X, innerY); innerY += 4;
@@ -187,7 +184,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
              doc.text(`6. Deudas IFIs: NO`, col1X, innerY);
         }
 
-        // SECCION NEGOCIO (LADO DERECHO)
         doc.setFont("helvetica", "bold");
         doc.setFontSize(9);
         doc.text("B. Del Negocio (Resumen)", 105, currentY + 4);
@@ -202,7 +198,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         doc.text(`Efectivo Actual: ${currency(negocio.monto_efectivo)}`, col2X, innerY); innerY += 5;
         doc.text(`Activo Fijo: ${currency(negocio.valor_actual_activo_fijo)}`, col2X, innerY); innerY += 5;
         
-        // Wrappeamos texto largo de última compra si es necesario
         const compraText = `Última Compra: ${currency(negocio.monto_ultima_compra)} (${negocio.fecha_ultima_compra})`;
         doc.text(compraText, col2X, innerY, { maxWidth: 90 }); 
         innerY += 5;
@@ -237,7 +232,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
             doc.setFont("helvetica", "normal");
             doc.rect(10, currentY, 190, 6);
             doc.text(g.clase_garantia || "", 12, currentY + 4);
-            // Usamos maxWidth para descripcion larga
             doc.text((g.descripcion_bien || ""), 40, currentY + 4, { maxWidth: 95 });
             doc.text(currency(g.valor_comercial), 140, currentY + 4);
             doc.text(currency(g.valor_realizacion), 170, currentY + 4);
@@ -300,7 +294,6 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
         }
 
         // --- FECHA AL FINAL ---
-        // Colocamos la fecha debajo de las firmas, alineada a la derecha
         doc.setFont("helvetica", "normal");
         doc.setFontSize(9);
         const fechaActual = new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -415,8 +408,7 @@ const EvaluacionDetailModal = ({ isOpen, onClose, data }) => {
                                 <div><span className="font-semibold text-gray-600 block">Gastos Op.:</span> {currency(negocio.gastos_operativos_variables)}</div>
                                 <div className="col-span-2"><span className="font-semibold text-gray-600">Última Compra:</span> {negocio.fecha_ultima_compra} ({currency(negocio.monto_ultima_compra)})</div>
                             </div>
-                            {/* ... Resto de la sección (fotos, tabla) igual ... */}
-                             <div className="mb-6">
+                            <div className="mb-6">
                                 <h4 className="font-semibold text-gray-700 mb-3 text-sm border-l-4 border-blue-500 pl-2">Evidencias Fotográficas</h4>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <RenderImagen titulo="Apuntes de Cobranza" descripcion="Evidencia de Cuentas por Cobrar" url={negocio.url_foto_cobranza} />
